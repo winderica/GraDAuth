@@ -15,6 +15,9 @@
 │   ├── chaincode/
 │   │   ├── src/
 │   │   └── ...
+│   ├── electron/
+│   │   ├── src/
+│   │   └── ...
 │   └── frontend/
 │       ├── src/
 │       └── ...
@@ -42,12 +45,20 @@ directory: `fabric/chaincode/`
 yarn --ignore-engines
 ```
 
+### Install PreDAuth electron dependencies
+
+directory: `fabric/electron/`
+
+```shell
+yarn --ignore-engines
+```
+
 ### Install PreDAuth frontend dependencies
 
 directory: `fabric/frontend/`
 
 ```shell
-yarn --ignore-engines
+yarn
 ```
 
 ### Install App frontend dependencies
@@ -88,6 +99,14 @@ directory: `fabric/network/`
 
 ```shell
 ./network.sh deployCC -n PreDAuth
+```
+
+### Run PreDAuth electron
+
+directory: `fabric/electron/`
+
+```shell
+yarn start
 ```
 
 ### Run PreDAuth frontend
