@@ -3,8 +3,8 @@ import path from 'path';
 import FabricCAServices, { IKeyValueAttribute } from 'fabric-ca-client';
 import { Gateway, Wallets, X509Identity } from 'fabric-network';
 
-import ccp1 from '../assets/connection-org1.json';
-import ccp2 from '../assets/connection-org2.json';
+import ccp1 from '../../assets/connection-org1.json';
+import ccp2 from '../../assets/connection-org2.json';
 
 const getWallet = async () => {
     return await Wallets.newFileSystemWallet(path.join(process.cwd(), 'wallet'));
@@ -23,8 +23,8 @@ export const getContract = async (id: string) => {
         identity: id,
         discovery: {
             enabled: true,
-            asLocalhost: true
-        }
+            asLocalhost: true,
+        },
     });
 
     const network = await gateway.getNetwork('channel');
@@ -35,7 +35,7 @@ export const getContract = async (id: string) => {
 export const addAdmin = async (org: 1 | 2 = 1) => {
     const caInfo = [
         ccp1.certificateAuthorities['ca.org1.example.com'],
-        ccp2.certificateAuthorities['ca.org2.example.com']
+        ccp2.certificateAuthorities['ca.org2.example.com'],
     ][org - 1];
     const caTLSCACerts = caInfo.tlsCACerts.pem;
     const ca = new FabricCAServices(caInfo.url, { trustedRoots: caTLSCACerts, verify: false }, caInfo.caName);
@@ -62,14 +62,13 @@ export const addAdmin = async (org: 1 | 2 = 1) => {
 export const addUser = async (id: string, attrs?: IKeyValueAttribute[], org: 1 | 2 = 1) => {
     const caURL = [
         ccp1.certificateAuthorities['ca.org1.example.com'],
-        ccp2.certificateAuthorities['ca.org2.example.com']
+        ccp2.certificateAuthorities['ca.org2.example.com'],
     ][org - 1].url;
     const ca = new FabricCAServices(caURL);
 
     const wallet = await getWallet();
-    const user = await wallet.get(id);
-    if (user) {
-        throw new Error(`User ${id} already exists.`);
+    if (await wallet.get(id)) {
+        return;
     }
 
     const admin = await wallet.get(`admin${org}`);
@@ -84,7 +83,7 @@ export const addUser = async (id: string, attrs?: IKeyValueAttribute[], org: 1 |
         affiliation: `org${org}.department1`,
         enrollmentID: id,
         role: 'client',
-        attrs
+        attrs,
     }, adminUser);
     const enrollment = await ca.enroll({ enrollmentID: id, enrollmentSecret: secret });
     const x509Identity: X509Identity = {

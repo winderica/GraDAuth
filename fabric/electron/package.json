@@ -1,0 +1,30 @@
+{
+  "name": "fabric-electron",
+  "version": "1.0.0",
+  "license": "MIT",
+  "homepage": "/",
+  "main": "dist/src/index.js",
+  "dependencies": {
+    "@guildofweavers/genstark": "^0.7.6",
+    "fabric-ca-client": "^2.2.5",
+    "fabric-network": "^2.2.5"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.15.0",
+    "@typescript-eslint/parser": "^4.15.0",
+    "electron": "^12.0.0",
+    "electron-rebuild": "^2.3.5",
+    "eslint": "^7.20.0",
+    "eslint-import-resolver-typescript": "^2.3.0",
+    "eslint-plugin-import": "^2.22.1",
+    "typescript": "^4.2.2",
+    "wait-on": "^5.2.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start:electron": "electron .",
+    "start": "yarn build && wait-on http://127.0.0.1:8000 && yarn start:electron",
+    "postinstall": "electron-rebuild",
+    "lint": "eslint . --ext .js,.ts,.tsx --fix"
+  }
+}
