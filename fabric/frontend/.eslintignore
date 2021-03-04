@@ -1,6 +1,2 @@
 node_modules
-snowpack.config.js
-.eslintrc.js
-config
-scripts
-build
+*.js
