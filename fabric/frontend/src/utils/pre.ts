@@ -1,6 +1,7 @@
-import { BLS12_381, Common, Fr, G1, G2, GT, init, Mcl } from 'mcl';
+import { BLS12_381, Common, init, Mcl } from 'mcl';
+import type { Fr, G1, G2, GT } from 'mcl';
 
-export { Fr, G1, G2, GT };
+export type { Fr, G1, G2, GT };
 
 export class PRE {
     mcl!: Mcl;
@@ -12,7 +13,7 @@ export class PRE {
     generatorGen(g: string, h: string, fromHex = false) {
         return {
             g: fromHex ? this.mcl.deserializeHexStrToG1(g) : this.mcl.hashAndMapToG1(g),
-            h: fromHex ? this.mcl.deserializeHexStrToG2(h) : this.mcl.hashAndMapToG2(h)
+            h: fromHex ? this.mcl.deserializeHexStrToG2(h) : this.mcl.hashAndMapToG2(h),
         };
     }
 
@@ -90,9 +91,13 @@ export class PRE {
     }
 
     deserialize(str: string, group: 'G1'): G1;
+
     deserialize(str: string, group: 'G2'): G2;
+
     deserialize(str: string, group: 'GT'): GT;
+
     deserialize(str: string, group: 'Fr'): Fr;
+
     deserialize(str: string, group: 'G1' | 'G2' | 'GT' | 'Fr') {
         switch (group) {
             case 'Fr':

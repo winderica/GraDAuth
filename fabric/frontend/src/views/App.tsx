@@ -9,9 +9,7 @@ import { theme, useStyles } from '../styles/global';
 
 import { Auth } from './Auth';
 import { Data } from './Data';
-import { Debug } from './Debug';
 import { Home } from './Home';
-import { Register } from './Register';
 
 export const App: FC = () => {
     useStyles();
@@ -27,8 +25,6 @@ export const App: FC = () => {
                                         <Route path='/' element={<Home />} />
                                         <Route path='/data' element={<Data/>} />
                                         <Route path='/auth' element={<Auth />} />
-                                        <Route path='/register' element={<Register />} />
-                                        <Route path='/debug' element={<Debug />} />
                                     </Routes>
                                 </AliceProvider>
                             </Frame>

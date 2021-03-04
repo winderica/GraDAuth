@@ -1,9 +1,6 @@
-import 'electron';
 const { ipcRenderer } = window.require('electron');
 
 import { Generators, TaggedEncrypted, TaggedReKey } from '../constants/types';
-import { exportPublicKey, sign } from '../utils/ecdsa';
-import { random } from '../utils/random';
 
 class API {
     getGenerators() {
@@ -15,60 +12,39 @@ class API {
         });
     }
 
-    getData(id: string) {
+    getData(tags: string[], password: string) {
         return new Promise<TaggedEncrypted>((resolve, reject) => {
             ipcRenderer.once('getData', (_, { ok, payload }) => {
                 ok ? resolve(payload) : reject(new Error(payload));
             });
-            ipcRenderer.send('getData', id);
+            ipcRenderer.send('getData', tags, password);
         });
     }
 
-    async setData(id: string, key: CryptoKeyPair, payload: TaggedEncrypted) {
-        const nonce = random(32);
-        const signature = await sign(nonce, key);
+    async setData(data: TaggedEncrypted, password: string) {
         return new Promise<void>((resolve, reject) => {
             ipcRenderer.once('setData', (_, { ok, payload }) => {
                 ok ? resolve() : reject(new Error(payload));
             });
-            ipcRenderer.send('setData', id, {
-                nonce,
-                signature,
-                payload
-            });
+            ipcRenderer.send('setData', data, password);
         });
     }
 
-    async reEncrypt(id: string, key: CryptoKeyPair, callback: string, payload: TaggedReKey) {
-        const nonce = random(32);
-        const signature = await sign(nonce, key);
+    async delData(tags: string[], password: string) {
+        return new Promise<void>((resolve, reject) => {
+            ipcRenderer.once('delData', (_, { ok, payload }) => {
+                ok ? resolve() : reject(new Error(payload));
+            });
+            ipcRenderer.send('delData', tags, password);
+        });
+    }
+
+    async reEncrypt(data: TaggedReKey, password: string, to: string) {
         return new Promise<void>((resolve, reject) => {
             ipcRenderer.once('reEncrypt', (_, { ok, payload }) => {
                 ok ? resolve() : reject(new Error(payload));
             });
-            ipcRenderer.send('reEncrypt', id, {
-                nonce,
-                signature,
-                payload
-            }, callback);
-        });
-    }
-
-    async register(id: string, key: CryptoKeyPair) {
-        const nonce = random(32);
-        const signature = await sign(nonce, key);
-        const publicKey = await exportPublicKey(key);
-        return new Promise<void>((resolve, reject) => {
-            ipcRenderer.once('register', (_, { ok, payload }) => {
-                ok ? resolve() : reject(new Error(payload));
-            });
-            ipcRenderer.send('register', id, {
-                nonce,
-                signature,
-                payload: {
-                    publicKey
-                }
-            });
+            ipcRenderer.send('reEncrypt', data, password, to);
         });
     }
 }

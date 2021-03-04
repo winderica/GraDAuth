@@ -14,7 +14,7 @@ import { useUrlParams } from '../hooks/useUrlParams';
 import { useUserData } from '../hooks/useUserData';
 import { UserDataStore } from '../stores';
 import { useStyles } from '../styles/auth';
-import { encrypt } from '../utils/aliceBobWrapper';
+import { encrypt } from '../utils/aliceWrapper';
 import { apiWrapper } from '../utils/apiWrapper';
 
 interface AuthGettingRequest {
@@ -37,7 +37,7 @@ interface AuthSettingRequest {
 
 type AuthRequest = AuthGettingRequest | AuthSettingRequest;
 
-const AuthGetting: FC<{ request: AuthGettingRequest; }> = observer(({ request }) => {
+const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) => {
     const { identityStore, keyStore, userDataStore, notificationStore } = useStores();
     useUserData();
     const alice = useAlice();
@@ -51,9 +51,9 @@ const AuthGetting: FC<{ request: AuthGettingRequest; }> = observer(({ request })
         );
         await apiWrapper(
             async () => {
-                await api.reEncrypt(identityStore.id, identityStore.key, request.callback, data);
+                await api.reEncrypt(data, identityStore.password, request.callback);
                 notificationStore.enqueueInfo(<>
-                    页面将在<Timer time={5} key={performance.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
+                    页面将在<Timer time={5} key={Date.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
                 </>);
             }, '正在提交重加密密钥', '成功提交重加密密钥'
         );
@@ -70,7 +70,13 @@ const AuthGetting: FC<{ request: AuthGettingRequest; }> = observer(({ request })
                 <Typography>为应用生成重加密密钥，将您保存在PreDAuth上的数据安全地发送给应用。</Typography>
                 <Typography>应用{request.id}想要获取您的以下信息：</Typography>
                 {request.data.map((key) => (
-                    <Checkbox checked={!!checked[key]} onCheck={handleCheck} name={key} disabled={!userDataStore.data[key]} key={key} />
+                    <Checkbox
+                        checked={!!checked[key]}
+                        onCheck={handleCheck}
+                        name={key}
+                        disabled={!userDataStore.data[key]}
+                        key={key}
+                    />
                 ))}
                 <Typography>数据对应的标签将自动勾选</Typography>
                 {Object.entries(userDataStore.dataGroupedByTag).map(([tag, data]) => (
@@ -84,20 +90,22 @@ const AuthGetting: FC<{ request: AuthGettingRequest; }> = observer(({ request })
     );
 });
 
-const AuthSetting: FC<{ request: AuthSettingRequest; }> = observer(({ request }) => {
+const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) => {
     const { userDataStore, identityStore, keyStore, notificationStore } = useStores();
     useUserData();
     const alice = useAlice();
     const classes = useStyles();
-    const deltaDataStore = new UserDataStore(Object.fromEntries(Object.entries(request.data).map(([k, v]) => [k, { value: v, tag: '' }])));
+    const deltaDataStore = new UserDataStore(
+        Object.fromEntries(Object.entries(request.data).map(([k, v]) => [k, { value: v, tag: '' }]))
+    );
     const handleAuth = async () => {
         deltaDataStore.dataArray.forEach(({ key, value, tag }) => userDataStore.set(key, value, tag));
         const { dataKey, encrypted } = await encrypt(alice, userDataStore.dataArrayGroupedByTag);
         await apiWrapper(async () => {
-            await api.setData(identityStore.id, identityStore.key, encrypted);
+            await api.setData(encrypted, identityStore.password);
             await keyStore.set(dataKey);
             notificationStore.enqueueInfo(<>
-                页面将在<Timer time={5} key={performance.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
+                页面将在<Timer time={5} key={Date.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
             </>);
         }, '正在提交加密数据', '成功加密并提交');
     };
@@ -126,7 +134,7 @@ export const Auth: FC = observer(() => {
         }
     }, []);
 
-    if (!identityStore.id) {
+    if (!identityStore.password) {
         return <Navigate to='/' />;
     }
 

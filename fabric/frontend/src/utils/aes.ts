@@ -2,7 +2,9 @@ import { base64ToUint8Array, hexToUint8Array, uint8ArrayToBase64, uint8ArrayToHe
 
 export class AES {
     readonly #key: PromiseLike<CryptoKey>;
+
     readonly #iv: Uint8Array;
+
     readonly #algorithm: string;
 
     constructor(key: string, iv?: string, algorithm = 'AES-CBC') {
@@ -29,7 +31,7 @@ export class AES {
             await crypto.subtle.encrypt(
                 {
                     name: this.#algorithm,
-                    iv: this.#iv
+                    iv: this.#iv,
                 },
                 await this.#key,
                 new TextEncoder().encode(plaintext)

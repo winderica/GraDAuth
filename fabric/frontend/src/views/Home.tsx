@@ -1,7 +1,6 @@
 import { Typography } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import React, { FC } from 'react';
-import { Navigate } from 'react-router-dom';
 
 import { useStores } from '../hooks/useStores';
 import logo from '../images/logo.png';
@@ -11,8 +10,13 @@ export const Home: FC = observer(() => {
     const { identityStore } = useStores();
     const classes = useStyles();
 
-    return identityStore.id
-        ? <div className={classes.container}>
+    if (!identityStore.password) {
+        identityStore.setPassword('P@ssw0rd');
+        return null; // TODO
+    }
+
+    return (
+        <div className={classes.container}>
             <img className={classes.logo} src={logo} alt='PreDAuth logo' />
             <div>
                 <Typography variant='h2' className={classes.header}>PreDAuth</Typography>
@@ -21,5 +25,5 @@ export const Home: FC = observer(() => {
                 </Typography>
             </div>
         </div>
-        : <Navigate to='/' />;
+    );
 });

@@ -18,7 +18,7 @@ export class NotificationStore {
         this.notifications.push({
             key: Date.now(),
             message,
-            options
+            options,
         });
     }
 
@@ -48,6 +48,6 @@ export class NotificationStore {
     }
 
     removeSnackbar(key: SnackbarKey) {
-        this.notifications = this.notifications.filter(notification => notification.key !== key);
+        this.notifications = this.notifications.filter((notification) => notification.key !== key);
     }
 }

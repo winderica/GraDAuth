@@ -3,9 +3,9 @@ export interface Generators {
     h: string;
 }
 
-export type UserData = Record<string, { value: string; tag: string; }>;
+export type UserData = Record<string, { value: string; tag: string }>;
 
-export type UserDataArray = { key: string; value: string; tag: string; }[];
+export type UserDataArray = { key: string; value: string; tag: string }[];
 
 export type TaggedUserData = Record<string, Record<string, string>>;
 
@@ -28,17 +28,6 @@ export interface Encrypted {
 }
 
 export type TaggedEncrypted = Record<string, Encrypted>;
-
-export interface ReEncrypted {
-    data: string;
-    key: {
-        cb0: string;
-        cb1: string;
-    };
-    iv: string;
-}
-
-export type TaggedReEncrypted = Record<string, ReEncrypted>;
 
 export type TaggedReKey = Record<string, string>;
 

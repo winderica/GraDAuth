@@ -6,14 +6,14 @@ export const useStyles = makeStyles(({ spacing }) => ({
         height: '100%',
         alignItems: 'center',
         justifyContent: 'space-around',
-        margin: `0 ${spacing(10)}px`
+        margin: `0 ${spacing(10)}px`,
     },
     logo: {
         width: '40%',
-        marginRight: spacing(6)
+        marginRight: spacing(6),
     },
     header: {
         textTransform: 'uppercase',
-        letterSpacing: '0.3rem'
+        letterSpacing: '0.3rem',
     },
 }));

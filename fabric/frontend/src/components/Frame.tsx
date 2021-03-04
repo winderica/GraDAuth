@@ -1,4 +1,4 @@
-import { Backup, BugReport, Fingerprint, List, Home } from '@material-ui/icons';
+import { BugReport, Fingerprint, Home, List } from '@material-ui/icons';
 import { observer } from 'mobx-react-lite';
 import React, { FC, useEffect, useState } from 'react';
 
@@ -14,13 +14,12 @@ const listItems = [
     { to: '/', text: 'home', icon: <Home /> },
     { to: '/data', text: 'data', icon: <List /> },
     { to: '/auth', text: 'auth', icon: <Fingerprint /> },
-    { to: '/backup', text: 'backup', icon: <Backup /> },
     { to: '/debug', text: 'debug', icon: <BugReport /> },
 ];
 
 export const Frame: FC = observer(({ children }) => {
     const classes = useStyles();
-    const { identityStore, keyStore, componentStateStore } = useStores();
+    const { keyStore, componentStateStore } = useStores();
     const [open, setOpen] = useState(false);
     const [initialized, setInitialized] = useState(false);
 
@@ -34,7 +33,6 @@ export const Frame: FC = observer(({ children }) => {
 
     useEffect(() => {
         void (async () => {
-            await identityStore.load();
             await keyStore.load();
             setInitialized(true);
         })();

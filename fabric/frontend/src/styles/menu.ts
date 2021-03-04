@@ -26,6 +26,6 @@ export const useStyles = makeStyles(({ transitions, mixins, spacing/*, breakpoin
         ...mixins.toolbar,
     },
     icon: {
-        margin: `0 ${spacing(1)}px`
-    }
+        margin: `0 ${spacing(1)}px`,
+    },
 }));

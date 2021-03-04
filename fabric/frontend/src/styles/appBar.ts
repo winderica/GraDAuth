@@ -15,7 +15,7 @@ export const useStyles = makeStyles(({ zIndex, palette, transitions, spacing, br
         ...(open ? {
             marginLeft: spacing(3),
             width: `calc(100% - ${spacing(30)}px)`,
-        } : {})
+        } : {}),
     }),
     appBarGutters: {
         paddingRight: 0,
@@ -32,7 +32,7 @@ export const useStyles = makeStyles(({ zIndex, palette, transitions, spacing, br
         [breakpoints.down('xs')]: {
             marginLeft: 0,
             marginRight: 0,
-            padding: spacing(1)
+            padding: spacing(1),
         },
     },
 }));

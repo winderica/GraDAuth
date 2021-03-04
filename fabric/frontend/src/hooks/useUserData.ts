@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { api } from '../api';
-import { decrypt } from '../utils/aliceBobWrapper';
+import { decrypt } from '../utils/aliceWrapper';
 import { apiWrapper } from '../utils/apiWrapper';
 
 import { useAlice } from './useAlice';
@@ -13,7 +13,7 @@ export const useUserData = () => {
     useEffect(() => {
         if (!userDataStore.initialized) {
             void apiWrapper(async () => {
-                const data = await api.getData(identityStore.id);
+                const data = await api.getData(Object.keys(keyStore.dataKey), identityStore.password);
                 const decrypted = await decrypt(alice, data, keyStore.dataKey);
                 userDataStore.setAll(Object.fromEntries(decrypted.map(({ key, tag, value }) => [key, { tag, value }])));
                 userDataStore.setInitialized();

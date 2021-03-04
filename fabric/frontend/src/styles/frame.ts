@@ -12,6 +12,6 @@ export const useStyles = makeStyles(({ spacing, breakpoints }) => ({
         [breakpoints.down('xs')]: {
             marginTop: spacing(6),
         },
-        padding: spacing(2)
+        padding: spacing(2),
     },
 }));

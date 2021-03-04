@@ -5,6 +5,7 @@ import { G1, G2, PRE } from './pre';
 
 export class Alice {
     readonly #g: G1;
+
     readonly #h: G2;
 
     constructor(public pre: PRE, g: string, h: string) {
@@ -24,7 +25,7 @@ export class Alice {
         const key = this.pre.keyGenInG1(this.#g, sk);
         return {
             pk: this.pre.serialize(key.pk),
-            sk: this.pre.serialize(key.sk)
+            sk: this.pre.serialize(key.sk),
         };
     }
 
@@ -50,7 +51,7 @@ export class Alice {
     async decrypt({ data, key: { ca0, ca1 }, iv }: Encrypted, sk: string) {
         const aesKey = this.pre.decrypt({
             ca0: this.pre.deserialize(ca0, 'Fr'),
-            ca1: this.pre.deserialize(ca1, 'G1')
+            ca1: this.pre.deserialize(ca1, 'G1'),
         }, this.pre.deserialize(sk, 'Fr'), this.#h);
         const aes = new AES(aesKey, iv);
         return aes.decrypt(data);

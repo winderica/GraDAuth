@@ -18,5 +18,4 @@ export class KeyStore {
         this.dataKey = key;
         await idb.set('dataKey', key);
     }
-
 }

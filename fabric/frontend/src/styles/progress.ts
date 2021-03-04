@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(({ zIndex }) => ({
+export const useStyles = makeStyles(({ zIndex }) => ({
     progress: {
         position: 'fixed',
         zIndex: zIndex.modal + 1,
@@ -9,5 +9,3 @@ const useStyles = makeStyles(({ zIndex }) => ({
         width: '100%',
     },
 }));
-
-export default useStyles;

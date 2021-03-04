@@ -14,7 +14,7 @@ export const Timer: FC<Props> = ({ time, onTimeout }) => {
             return;
         }
         setTimeout(() => {
-            setTimeLeft(prevTime => prevTime - 1);
+            setTimeLeft((prevTime) => prevTime - 1);
             console.log(timeLeft);
         }, 1000);
     });

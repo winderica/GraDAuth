@@ -8,9 +8,9 @@ export class UserDataStore {
     initialized: boolean;
 
     constructor(data: UserData = {}) {
-        makeAutoObservable(this);
         this.data = data;
         this.initialized = false;
+        makeAutoObservable(this);
     }
 
     setAll(data: UserData) {
@@ -35,7 +35,9 @@ export class UserDataStore {
 
     get dataGroupedByTag() {
         const res: TaggedUserData = {};
-        Object.entries(this.data).forEach(([key, { value, tag }]) => res[tag] ? res[tag][key] = value : res[tag] = { [key]: value });
+        Object.entries(this.data).forEach(([key, { value, tag }]) => {
+            res[tag] ? res[tag][key] = value : res[tag] = { [key]: value };
+        });
         return res;
     }
 
@@ -44,6 +46,6 @@ export class UserDataStore {
     }
 
     get tags() {
-        return [...new Set(Object.values(this.data).map(({ tag }) => tag))];
+        return new Set(Object.values(this.data).map(({ tag }) => tag));
     }
 }

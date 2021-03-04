@@ -14,7 +14,7 @@ import {
     SaveAlt,
     Search,
     SvgIconComponent,
-    ViewColumn
+    ViewColumn,
 } from '@material-ui/icons';
 import MaterialTable from 'material-table';
 import { observer } from 'mobx-react-lite';
@@ -59,7 +59,7 @@ export const Table: FC<Props> = observer(({ title, dataStore }) => {
                 Search: forwardSVGRef(Search),
                 SortArrow: forwardSVGRef(ArrowDownward),
                 ThirdStateCheck: forwardSVGRef(Remove),
-                ViewColumn: forwardSVGRef(ViewColumn)
+                ViewColumn: forwardSVGRef(ViewColumn),
             }}
             editable={{
                 /* eslint-disable @typescript-eslint/require-await */
@@ -68,24 +68,24 @@ export const Table: FC<Props> = observer(({ title, dataStore }) => {
                 onRowUpdate: async ({ key, value, tag }, oldData) => {
                     oldData && oldData.key !== key && dataStore.del(oldData.key);
                     dataStore.set(key, value, tag);
-                }
+                },
                 /* eslint-enable @typescript-eslint/require-await */
             }}
             options={{
                 search: false,
                 headerStyle: {
                     padding: 16,
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
                 },
-                grouping: true
+                grouping: true,
             }}
             localization={{
                 header: {
-                    actions: '修改/删除'
+                    actions: '修改/删除',
                 },
                 grouping: {
                     placeholder: '将标签列标题拖拽至此以进行分组',
-                    groupedBy: '分组：'
+                    groupedBy: '分组：',
                 },
                 body: {
                     emptyDataSourceMessage: '暂无数据',
@@ -105,7 +105,7 @@ export const Table: FC<Props> = observer(({ title, dataStore }) => {
                     labelDisplayedRows: '{from}到{to}行 共{count}行',
                     lastTooltip: '最后一页',
                     labelRowsSelect: '行每页',
-                }
+                },
             }}
         />
     );
