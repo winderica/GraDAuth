@@ -17,11 +17,11 @@ export const Home: FC = observer(() => {
 
     return (
         <div className={classes.container}>
-            <img className={classes.logo} src={logo} alt='PreDAuth logo' />
+            <img className={classes.logo} src={logo} alt='GradAuth logo' />
             <div>
-                <Typography variant='h2' className={classes.header}>PreDAuth</Typography>
+                <Typography variant='h2' className={classes.header}>GradAuth</Typography>
                 <Typography variant='h5'>
-                    PreDAuth is a decentralized authorization system based on Hyperledger Fabric and Proxy ReEncryption
+                    GradAuth Reinforces Anonymity in Decentralized Authorization
                 </Typography>
             </div>
         </div>
