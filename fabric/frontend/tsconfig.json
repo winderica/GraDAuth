@@ -1,32 +1,25 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "lib": [
-      "esnext",
-      "dom"
-    ],
-    "typeRoots": [
-      "typings",
-      "node_modules/@types"
-    ],
     "module": "esnext",
     "moduleResolution": "node",
-    "allowJs": true,
-    "outDir": "dist",
-    "pretty": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "jsx": "react",
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "baseUrl": "./",
+    "noEmit": true,
+    "skipLibCheck": true,
     "strict": true,
-    "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noUnusedParameters": true,
-    "experimentalDecorators": true,
-    "jsx": "react"
   },
-  "exclude": [
-    "node_modules",
-    "dist"
+  "include": [
+    "src",
+    "types",
+    "electron"
   ]
 }

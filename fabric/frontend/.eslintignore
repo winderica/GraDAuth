@@ -1,5 +1,5 @@
 node_modules
-webpack.config.js
+snowpack.config.js
 .eslintrc.js
 config
 scripts
