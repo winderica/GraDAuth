@@ -7,20 +7,16 @@
 ├── app/
 │   ├── backend/
 │   │   ├── src/
-│   │   ├── typings/
 │   │   └── ...
 │   └── frontend/
 │       ├── src/
-│       ├── typings/
 │       └── ...
 ├── fabric/
 │   ├── chaincode/
 │   │   ├── src/
-│   │   ├── typings/
 │   │   └── ...
 │   └── frontend/
 │       ├── src/
-│       ├── typings/
 │       └── ...
 └── lib/
     ├── mcl
@@ -28,236 +24,95 @@
 
 ```
 
-## API
-
-* `GET /auth/generators`
-```typescript
-interface Response {
-    ok: true;
-    payload: {
-        g: string;
-        h: string;
-    }
-}
-```
-
-* `GET /auth/pks`
-```typescript
-interface Response {
-    ok: true;
-    payload: {
-        pks: string[];
-    }
-}
-```
-
-* `POST /auth/reEncrypt/:id/:to`
-```typescript
-interface Body {
-    nonce: string;
-    signature: string;
-    payload: {
-        [tag: string]: string;
-    };
-}
-```
-```typescript
-interface Response {
-    ok: true;
-}
-```
-
-* `POST /user/:id`
-```typescript
-interface Body {
-    nonce: string;
-    signature: string;
-    payload: {
-        publicKey: string;
-    };
-}
-```
-```typescript
-interface Response {
-    ok: true;
-}
-```
-
-* `POST /user/:id/backup`
-```typescript
-interface Body {
-    nonce: string;
-    signature: string;
-    payload: {
-        [pk: string]: {
-            rk: {
-                [tag: string]: string;
-            };
-            email: string;
-        };
-    };
-}
-```
-```typescript
-interface Response {
-    ok: true;
-}
-```
-
-* `POST /user/:id/data`
-```typescript
-interface Body {
-    nonce: string;
-    signature: string;
-    payload: {
-        [tag: string]: {
-            key: {
-                ca0: string;
-                ca1: string;
-            };
-            data: string;
-            iv: string;
-        };
-    };
-}
-```
-```typescript
-interface Response {
-    ok: true;
-}
-```
-
-* `GET /user/:id/data`
-```typescript
-interface Response {
-    ok: true;
-    payload: {
-        [tag: string]: {
-            key: {
-                ca0: string;
-                ca1: string;
-            };
-            data: string;
-            iv: string;
-        };
-    };
-}
-```
-
-* `GET /user/:id/code/:email`
-```typescript
-interface Response {
-    ok: true;
-}
-```
-
-* `POST /user/:id/code`
-```typescript
-interface Body {
-    payload: {
-        codes: string[];
-    };
-}
-```
-```typescript
-interface Response {
-    ok: true;
-    payload: {
-        data: string[];    
-    }
-}
-```
-
 ## Notes
+
+### Download binaries
+
+directory: `fabric/network/`
+
+download from here: <https://github.com/hyperledger/fabric/releases>.
+
+only `configtxgen`, `fabric-ca-client`, `osnadmin` and `peer` are needed.
+
+### Install chaincode dependencies
+
+directory: `fabric/chaincode/`
+
+```shell
+yarn
+```
+
+### Install PreDAuth frontend dependencies
+
+directory: `fabric/frontend/`
+
+```shell
+yarn
+```
+
+### Install App frontend dependencies
+
+directory: `app/frontend/`
+
+```shell
+yarn
+```
+
+### Install App backend dependencies
+
+directory: `app/backend/`
+
+```shell
+yarn
+```
 
 ### Start network
 
-```shell script
-cd fabric/network/
+directory: `fabric/network/`
+
+```shell
 ./network.sh up
 ```
 
 ### Create channel
 
-```shell script
+directory: `fabric/network/`
+
+```shell
 ./network.sh createChannel
 ```
 
 ### Deploy/Upgrade chaincode
 
-* prerequisites
+directory: `fabric/network/`
 
-```shell script
-cd ../chaincode/
-yarn install
-cd ../network
-```
-
-* then
-
-```shell script
+```shell
 ./network.sh deployCC -n PreDAuth
 ```
 
-### Deploy PreDAuth backend
+### Run PreDAuth frontend
 
-* prerequisites
+directory: `fabric/frontend/`
 
-```shell script
-yarn install
-```
-
-* then
-
-```shell script
-yarn cleanup # only needed after restart fabric network
+```shell
 yarn start
 ```
 
-URL: `http://127.0.0.1:4000`
+### Run App backend
 
-### Deploy PreDAuth frontend
+directory: `app/backend/`
 
-* prerequisites
-
-```shell script
-yarn install
-```
-
-* then
-```shell script
-yarn start
-```
-
-URL: `http://127.0.0.1:3000`
-
-### Deploy App backend
-
-* prerequisites
-
-```shell script
-yarn install
-```
-
-* then
-
-```shell script
+```shell
 yarn start
 ```
 
 URL: `http://127.0.0.1:4001`
 
-### Deploy App frontend
+### Run App frontend
 
-* prerequisites
+directory: `app/frontend/`
 
-```shell script
-yarn install
-```
-
-* then
-
-```shell script
+```shell
 yarn start
 ```
 
