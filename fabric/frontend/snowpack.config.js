@@ -20,7 +20,7 @@ module.exports = {
         port: 8000,
     },
     alias: Object.fromEntries(
-        Object.entries(paths).map(([key, value]) =>
+        Object.entries(paths || {}).map(([key, value]) =>
             [key.replace('*', ''), value[0].replace('*', '')],
         ),
     ),
