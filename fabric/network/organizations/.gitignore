@@ -1,2 +1,6 @@
 ordererOrganizations
 peerOrganizations
+fabric-ca/ordererOrg/*
+fabric-ca/org1/*
+fabric-ca/org2/*
+!fabric-ca/**/fabric-ca-server-config.yaml
