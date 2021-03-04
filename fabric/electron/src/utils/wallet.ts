@@ -29,7 +29,7 @@ export const getContract = async (id: string) => {
 
     const network = await gateway.getNetwork('channel');
 
-    return network.getContract('PreDAuth');
+    return network.getContract('GraDAuth');
 };
 
 export const addAdmin = async (org: 1 | 2 = 1) => {

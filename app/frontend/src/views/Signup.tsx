@@ -21,7 +21,7 @@ export const Signup: FC<RouteComponentProps> = ({ navigate }) => {
         })();
     }, [navigate]);
     const handleClick = () => {
-        window.location.href = `${process.env.REACT_APP_PREDAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
+        window.location.href = `${process.env.REACT_APP_GRADAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
             type: 'get',
             id: 'YouChat',
             pk: appInfo.pk,
@@ -44,7 +44,7 @@ export const Signup: FC<RouteComponentProps> = ({ navigate }) => {
                         <TextField variant="outlined" label='用户名' fullWidth />
                         <TextField variant="outlined" label='密码' type='password' fullWidth />
                         <Button fullWidth variant='contained' color='primary' size='large'>注册</Button>
-                        <Button fullWidth variant='outlined' color='primary' size='large' onClick={handleClick}>使用PreDAuth登录</Button>
+                        <Button fullWidth variant='outlined' color='primary' size='large' onClick={handleClick}>使用GraDAuth登录</Button>
                         <Typography variant='caption' color='textSecondary'>* 注册即代表您同意我们的服务条款与隐私政策</Typography>
                     </CardContent>
                 </Card>

@@ -29,7 +29,7 @@ export const Dashboard: FC<RouteComponentProps> = ({ navigate }) => {
         })();
     }, [navigate]);
     const handleClick = () => {
-        window.location.href = `${process.env.REACT_APP_PREDAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
+        window.location.href = `${process.env.REACT_APP_GRADAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
             type: 'set',
             id: 'YouChat',
             pk: appInfo.pk,
@@ -55,7 +55,7 @@ export const Dashboard: FC<RouteComponentProps> = ({ navigate }) => {
                     </div>
                 </CardContent>
                 <CardActions className={classes.buttonContainer}>
-                    <Tooltip title='为您在PreDAuth中设置YouChat ID，以供其它应用获取'>
+                    <Tooltip title='为您在GraDAuth中设置YouChat ID，以供其它应用获取'>
                         <Button onClick={handleClick} variant='outlined' color='primary'>连携</Button>
                     </Tooltip>
                     <Button variant='contained' color='primary'>完成</Button>

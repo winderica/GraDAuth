@@ -10,10 +10,10 @@ import { Bob } from './utils/bob';
 import { randomString } from './utils/random';
 
 dotenv.config();
-const PREDAUTH_BACKEND = process.env.PREDAUTH_BACKEND;
+const GRADAUTH_BACKEND = process.env.GRADAUTH_BACKEND;
 const APP_BACKEND = process.env.APP_BACKEND;
 
-if (!PREDAUTH_BACKEND || !APP_BACKEND) {
+if (!GRADAUTH_BACKEND || !APP_BACKEND) {
     throw new Error('env not specified');
 }
 
@@ -35,7 +35,7 @@ const fakeDB: Record<string, Record<string, string>> = {};
 void (async () => {
     try {
         await pre.init();
-        const { payload: { g, h } } = await (await fetch(`${PREDAUTH_BACKEND}/auth/generators`)).json();
+        const { payload: { g, h } } = await (await fetch(`${GRADAUTH_BACKEND}/auth/generators`)).json();
         const bob = new Bob(pre, g, h);
 
         app.get('/appInfo', (req, res) => {

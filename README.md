@@ -47,7 +47,7 @@ directory: `fabric/chaincode/`
 yarn --ignore-engines
 ```
 
-### Install PreDAuth electron dependencies
+### Install GraDAuth electron dependencies
 
 directory: `fabric/electron/`
 
@@ -55,7 +55,7 @@ directory: `fabric/electron/`
 yarn --ignore-engines
 ```
 
-### Install PreDAuth frontend dependencies
+### Install GraDAuth frontend dependencies
 
 directory: `fabric/frontend/`
 
@@ -100,10 +100,10 @@ directory: `fabric/network/`
 directory: `fabric/network/`
 
 ```shell
-./network.sh deployCC -n PreDAuth
+./network.sh deployCC -n GraDAuth
 ```
 
-### Run PreDAuth electron
+### Run GraDAuth electron
 
 directory: `fabric/electron/`
 
@@ -111,7 +111,7 @@ directory: `fabric/electron/`
 yarn start
 ```
 
-### Run PreDAuth frontend
+### Run GraDAuth frontend
 
 directory: `fabric/frontend/`
 

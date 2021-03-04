@@ -1,4 +1,4 @@
-import { PreDAuth } from './contracts';
-export { PreDAuth };
+import { GraDAuth } from './contracts';
+export { GraDAuth };
 
-export const contracts = [ PreDAuth ];
+export const contracts = [ GraDAuth ];

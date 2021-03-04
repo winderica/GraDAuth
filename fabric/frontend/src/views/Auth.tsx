@@ -67,7 +67,7 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
         <Card className={classes.container}>
             <CardHeader title='授权获取信息' />
             <CardContent>
-                <Typography>为应用生成重加密密钥，将您保存在PreDAuth上的数据安全地发送给应用。</Typography>
+                <Typography>为应用生成重加密密钥，将您保存在GraDAuth上的数据安全地发送给应用。</Typography>
                 <Typography>应用{request.id}想要获取您的以下信息：</Typography>
                 {request.data.map((key) => (
                     <Checkbox

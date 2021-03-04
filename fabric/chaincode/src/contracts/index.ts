@@ -14,7 +14,7 @@ interface Data {
     iv: string;
 }
 
-class PreDAuthContext extends Context {
+class GraDAuthContext extends Context {
     data: DataLedger;
 
     constructor() {
@@ -23,7 +23,7 @@ class PreDAuthContext extends Context {
     }
 }
 
-export class PreDAuth extends Contract {
+export class GraDAuth extends Contract {
     pre!: PRE;
 
     g!: G1;
@@ -31,10 +31,10 @@ export class PreDAuth extends Contract {
     h!: G2;
 
     createContext() {
-        return new PreDAuthContext();
+        return new GraDAuthContext();
     }
 
-    async init(_: PreDAuthContext, str1: string, str2: string) {
+    async init(_: GraDAuthContext, str1: string, str2: string) {
         this.pre = new PRE();
         await this.pre.init();
         const { g, h } = this.pre.generatorGen(str1, str2);
@@ -42,7 +42,7 @@ export class PreDAuth extends Contract {
         this.h = h;
     }
 
-    async getData(ctx: PreDAuthContext, json: string) {
+    async getData(ctx: GraDAuthContext, json: string) {
         const tags: string[] = JSON.parse(json);
         const result: Record<string, Data> = {};
         for (const tag of tags) {
@@ -51,7 +51,7 @@ export class PreDAuth extends Contract {
         return JSON.stringify(result);
     }
 
-    async setData(ctx: PreDAuthContext, json: string) {
+    async setData(ctx: GraDAuthContext, json: string) {
         const data: [string, Data, string][] = JSON.parse(json);
         for (const [tag, value, proof] of data) {
             if (!verify(tag, proof)) {
@@ -61,7 +61,7 @@ export class PreDAuth extends Contract {
         }
     }
 
-    async delData(ctx: PreDAuthContext, json: string) {
+    async delData(ctx: GraDAuthContext, json: string) {
         const data: [string, string][] = JSON.parse(json);
         for (const [tag, proof] of data) {
             if (!verify(tag, proof)) {
@@ -71,7 +71,7 @@ export class PreDAuth extends Contract {
         }
     }
 
-    async reEncrypt(ctx: PreDAuthContext, json: string, to: string) {
+    async reEncrypt(ctx: GraDAuthContext, json: string, to: string) {
         const data: [string, string, string][] = JSON.parse(json);
         for (const [tag, , proof] of data) {
             if (!verify(tag, proof)) {
