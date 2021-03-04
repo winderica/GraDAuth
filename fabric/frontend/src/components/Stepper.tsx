@@ -1,5 +1,5 @@
 import { Button, Step, StepContent, StepLabel, Stepper as MuiStepper } from '@material-ui/core';
-import { observer } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import React, { FC, useState } from 'react';
 
 import { useStyles } from '../styles/stepper';
@@ -13,7 +13,7 @@ interface Props {
     checkDisabled: (step: number) => boolean;
 }
 
-export const Stepper = observer<FC<Props>>(({ steps, checkDisabled }) => {
+export const Stepper: FC<Props> = observer(({ steps, checkDisabled }) => {
     const [step, setStep] = useState(0);
     const classes = useStyles();
     const handleNext = () => {

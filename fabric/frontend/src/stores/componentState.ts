@@ -1,19 +1,13 @@
-import { action, observable } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 
 export class ComponentStateStore {
-    @observable
     progressOn = false;
 
-    @observable
-    recovered = false;
-
-    @action
-    setProgress(on = true) {
-        this.progressOn = on;
+    constructor() {
+        makeAutoObservable(this);
     }
 
-    @action
-    setRecovered(recovered = true) {
-        this.recovered = recovered;
+    setProgress(on = true) {
+        this.progressOn = on;
     }
 }

@@ -1,6 +1,6 @@
 import { Button, Typography } from '@material-ui/core';
 import { RouteComponentProps } from '@reach/router';
-import { observer } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import React, { FC } from 'react';
 
 import { Anchor } from '../components/Anchor';

@@ -1,5 +1,5 @@
 import * as idb from 'idb-keyval';
-import { observer } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import React, { FC, useEffect, useState } from 'react';
 
 import { api } from '../api';

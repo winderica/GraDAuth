@@ -1,7 +1,7 @@
 import { Card } from '@material-ui/core';
 import { Description, DescriptionOutlined, DescriptionTwoTone, VpnKey, VpnKeyOutlined, VpnKeyTwoTone } from '@material-ui/icons';
 import { Redirect, RouteComponentProps } from '@reach/router';
-import { observer } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import React, { ChangeEvent, FC, useEffect, useState } from 'react';
 
 import { AdornedTextField } from '../components/AdornedTextField';

@@ -1,6 +1,6 @@
 import { Button, TextField, Typography } from '@material-ui/core';
 import { RouteComponentProps } from '@reach/router';
-import { observer } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import React, { ChangeEvent, FC, useState } from 'react';
 
 import { api } from '../api';
@@ -11,7 +11,7 @@ import { encrypt } from '../utils/aliceBobWrapper';
 import { apiWrapper } from '../utils/apiWrapper';
 import { generateKey } from '../utils/ecdsa';
 
-export const Register = observer<FC<RouteComponentProps>>(({ navigate }) => {
+export const Register: FC<RouteComponentProps> = observer(({ navigate }) => {
     const { identityStore, componentStateStore, userDataStore, keyStore } = useStores();
     const [id, setId] = useState('');
     const alice = useAlice();
@@ -23,12 +23,6 @@ export const Register = observer<FC<RouteComponentProps>>(({ navigate }) => {
         await api.register(id, key);
         await identityStore.setId(id);
         await identityStore.setKey(key);
-        if (componentStateStore.recovered) {
-            const { dataKey, encrypted } = await encrypt(alice, userDataStore.dataArrayGroupedByTag);
-            await api.setData(id, key, encrypted);
-            await keyStore.set(dataKey);
-            componentStateStore.setRecovered(false);
-        }
         if (!navigate) {
             throw new Error('How could this happen?');
         }
@@ -38,14 +32,10 @@ export const Register = observer<FC<RouteComponentProps>>(({ navigate }) => {
         <Dialog
             open={true}
             setOpen={() => undefined}
-            title={componentStateStore.recovered ? '恢复即将完成' : '初始化'}
+            title='初始化'
             content={
                 <>
-                    <Typography>{
-                        componentStateStore.recovered
-                            ? '出于安全因素，请输入一个新的id（不可重复），我们将为您重新分配公私钥'
-                            : '请输入您的id（不可重复），我们将为您分配对应的公私钥'
-                    }</Typography>
+                    <Typography>请输入您的id（不可重复），我们将为您分配对应的公私钥</Typography>
                     <TextField
                         autoFocus
                         margin='dense'

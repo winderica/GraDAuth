@@ -1,7 +1,7 @@
 import { Button } from '@material-ui/core';
 import { Redirect, RouteComponentProps } from '@reach/router';
 import { toJS } from 'mobx';
-import { observer } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import React, { FC } from 'react';
 
 import { api } from '../api';

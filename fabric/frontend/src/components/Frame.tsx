@@ -1,5 +1,5 @@
 import { Backup, BugReport, Fingerprint, List, Home } from '@material-ui/icons';
-import { observer } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import React, { FC, useEffect, useState } from 'react';
 
 import { useStores } from '../hooks/useStores';

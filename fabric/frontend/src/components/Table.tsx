@@ -17,7 +17,7 @@ import {
     ViewColumn
 } from '@material-ui/icons';
 import MaterialTable from 'material-table';
-import { observer } from 'mobx-react';
+import { observer } from 'mobx-react-lite';
 import React, { FC, forwardRef, ForwardRefRenderFunction } from 'react';
 
 import { UserDataStore } from '../stores';
