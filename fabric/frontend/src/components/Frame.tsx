@@ -18,7 +18,7 @@ const listItems = [
     { to: '/debug', text: 'debug', icon: <BugReport /> },
 ];
 
-export const Frame = observer<FC>(({ children }) => {
+export const Frame: FC = observer(({ children }) => {
     const classes = useStyles();
     const { identityStore, keyStore, componentStateStore } = useStores();
     const [open, setOpen] = useState(false);

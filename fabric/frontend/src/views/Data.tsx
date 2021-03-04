@@ -1,8 +1,8 @@
 import { Button } from '@material-ui/core';
-import { Redirect, RouteComponentProps } from '@reach/router';
 import { toJS } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import React, { FC } from 'react';
+import { Navigate } from 'react-router-dom';
 
 import { api } from '../api';
 import { Table } from '../components/Table';
@@ -14,12 +14,12 @@ import { useStyles } from '../styles/data';
 import { encrypt } from '../utils/aliceBobWrapper';
 import { apiWrapper } from '../utils/apiWrapper';
 
-export const Data = observer<FC<RouteComponentProps>>(() => {
+export const Data: FC = observer(() => {
     const classes = useStyles();
     const stores = useStores();
     const { userDataStore, identityStore, keyStore } = stores;
     if (!identityStore.id) {
-        return <Redirect to='/' noThrow />;
+        return <Navigate to='/' />;
     }
     const alice = useAlice();
     useUserData();

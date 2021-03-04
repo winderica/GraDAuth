@@ -1,8 +1,8 @@
 import { Card } from '@material-ui/core';
 import { Description, DescriptionOutlined, DescriptionTwoTone, VpnKey, VpnKeyOutlined, VpnKeyTwoTone } from '@material-ui/icons';
-import { Redirect, RouteComponentProps } from '@reach/router';
 import { observer } from 'mobx-react-lite';
 import React, { ChangeEvent, FC, useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 
 import { AdornedTextField } from '../components/AdornedTextField';
 import { Checkbox } from '../components/Checkbox';
@@ -20,7 +20,7 @@ import { Bob } from '../utils/bob';
 
 const formatJSON = (object: unknown, indent = 2) => JSON.stringify(object, null, ' '.repeat(indent));
 
-export const Debug = observer<FC<RouteComponentProps>>(() => {
+export const Debug: FC = observer(() => {
     const { identityStore, userDataStore } = useStores();
     const alice = useAlice();
     useUserData();
@@ -35,7 +35,7 @@ export const Debug = observer<FC<RouteComponentProps>>(() => {
         setDataKey(getDataKey(alice, userDataStore.tags));
     }, [userDataStore.tags]);
     if (!identityStore.id) {
-        return <Redirect to='/' noThrow />;
+        return <Navigate to='/' />;
     }
 
     const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {

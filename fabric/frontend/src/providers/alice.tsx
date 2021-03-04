@@ -9,7 +9,7 @@ import { useStores } from '../hooks/useStores';
 import { Alice } from '../utils/alice';
 import { PRE } from '../utils/pre';
 
-export const AliceProvider = observer<FC>(({ children }) => {
+export const AliceProvider: FC = observer(({ children }) => {
     const [alice, setAlice] = useState<Alice | undefined>(undefined);
     const { notificationStore, componentStateStore } = useStores();
     useEffect(() => {

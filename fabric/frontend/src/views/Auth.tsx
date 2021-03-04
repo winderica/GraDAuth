@@ -1,7 +1,7 @@
 import { Button, Card, CardActions, CardContent, CardHeader, Typography } from '@material-ui/core';
-import { Redirect, RouteComponentProps } from '@reach/router';
 import { observer } from 'mobx-react-lite';
 import React, { ChangeEvent, FC, useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 
 import { api } from '../api';
 import { Checkbox } from '../components/Checkbox';
@@ -37,7 +37,7 @@ interface AuthSettingRequest {
 
 type AuthRequest = AuthGettingRequest | AuthSettingRequest;
 
-const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request }) => {
+const AuthGetting: FC<{ request: AuthGettingRequest; }> = observer(({ request }) => {
     const { identityStore, keyStore, userDataStore, notificationStore } = useStores();
     useUserData();
     const alice = useAlice();
@@ -84,7 +84,7 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
     );
 });
 
-const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request }) => {
+const AuthSetting: FC<{ request: AuthSettingRequest; }> = observer(({ request }) => {
     const { userDataStore, identityStore, keyStore, notificationStore } = useStores();
     useUserData();
     const alice = useAlice();
@@ -116,7 +116,7 @@ const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request })
     );
 });
 
-export const Auth = observer<FC<RouteComponentProps>>(() => {
+export const Auth: FC = observer(() => {
     const { identityStore, notificationStore } = useStores();
     const request = useUrlParams<AuthRequest>('request');
 
@@ -127,7 +127,7 @@ export const Auth = observer<FC<RouteComponentProps>>(() => {
     }, []);
 
     if (!identityStore.id) {
-        return <Redirect to='/' noThrow />;
+        return <Navigate to='/' />;
     }
 
     switch (request?.type) {

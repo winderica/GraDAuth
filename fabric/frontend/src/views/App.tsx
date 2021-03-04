@@ -1,7 +1,7 @@
 import { CssBaseline, ThemeProvider } from '@material-ui/core';
-import { LocationProvider, Router } from '@reach/router';
 import { SnackbarProvider } from 'notistack';
 import React, { FC, StrictMode } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { Frame } from '../components/Frame';
 import { AliceProvider } from '../providers/alice';
@@ -20,19 +20,19 @@ export const App: FC = () => {
             <CssBaseline>
                 <ThemeProvider theme={theme}>
                     <SnackbarProvider maxSnack={5}>
-                        <LocationProvider>
+                        <BrowserRouter>
                             <Frame>
                                 <AliceProvider>
-                                    <Router primary={false} component={({ children }) => <>{children}</>}>
-                                        <Home path='/' />
-                                        <Data path='/data' />
-                                        <Auth path='/auth' />
-                                        <Register path='/register' />
-                                        <Debug path='/debug' />
-                                    </Router>
+                                    <Routes>
+                                        <Route path='/' element={<Home />} />
+                                        <Route path='/data' element={<Data/>} />
+                                        <Route path='/auth' element={<Auth />} />
+                                        <Route path='/register' element={<Register />} />
+                                        <Route path='/debug' element={<Debug />} />
+                                    </Routes>
                                 </AliceProvider>
                             </Frame>
-                        </LocationProvider>
+                        </BrowserRouter>
                     </SnackbarProvider>
                 </ThemeProvider>
             </CssBaseline>

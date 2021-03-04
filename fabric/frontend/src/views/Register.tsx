@@ -1,20 +1,18 @@
 import { Button, TextField, Typography } from '@material-ui/core';
-import { RouteComponentProps } from '@reach/router';
 import { observer } from 'mobx-react-lite';
 import React, { ChangeEvent, FC, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { api } from '../api';
 import { Dialog } from '../components/Dialog';
-import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
-import { encrypt } from '../utils/aliceBobWrapper';
 import { apiWrapper } from '../utils/apiWrapper';
 import { generateKey } from '../utils/ecdsa';
 
-export const Register: FC<RouteComponentProps> = observer(({ navigate }) => {
-    const { identityStore, componentStateStore, userDataStore, keyStore } = useStores();
+export const Register: FC = observer(() => {
+    const navigate = useNavigate();
+    const { identityStore } = useStores();
     const [id, setId] = useState('');
-    const alice = useAlice();
     const handleInput = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
         setId(value);
     };
@@ -26,7 +24,7 @@ export const Register: FC<RouteComponentProps> = observer(({ navigate }) => {
         if (!navigate) {
             throw new Error('How could this happen?');
         }
-        await navigate('/');
+        navigate('/');
     }, '正在提交', '提交成功');
     return (
         <Dialog
@@ -46,9 +44,7 @@ export const Register: FC<RouteComponentProps> = observer(({ navigate }) => {
                     />
                 </>
             }
-            actions={
-                <Button color='primary' onClick={handleSubmit}>提交</Button>
-            }
+            actions={<Button color='primary' onClick={handleSubmit}>提交</Button>}
         />
     );
 });

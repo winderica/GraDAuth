@@ -1,15 +1,13 @@
-import { Button, Typography } from '@material-ui/core';
-import { RouteComponentProps } from '@reach/router';
+import { Typography } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import React, { FC } from 'react';
+import { Navigate } from 'react-router-dom';
 
-import { Anchor } from '../components/Anchor';
-import { Dialog } from '../components/Dialog';
 import { useStores } from '../hooks/useStores';
 import logo from '../images/logo.png';
 import { useStyles } from '../styles/home';
 
-export const Home = observer<FC<RouteComponentProps>>(() => {
+export const Home: FC = observer(() => {
     const { identityStore } = useStores();
     const classes = useStyles();
 
@@ -23,20 +21,5 @@ export const Home = observer<FC<RouteComponentProps>>(() => {
                 </Typography>
             </div>
         </div>
-        : <Dialog
-            open={true}
-            setOpen={() => undefined}
-            title='提示'
-            content='私钥不存在，请选择：'
-            actions={
-                <>
-                    <Anchor to='/register'>
-                        <Button color='primary'>初次使用</Button>
-                    </Anchor>
-                    <Anchor to='/recover'>
-                        <Button color='primary'>找回数据</Button>
-                    </Anchor>
-                </>
-            }
-        />;
+        : <Navigate to='/' />;
 });

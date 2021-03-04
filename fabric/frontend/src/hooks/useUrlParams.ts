@@ -1,8 +1,8 @@
-import { useLocation } from '@reach/router';
+import { useSearchParams } from 'react-router-dom';
 
 export const useUrlParams = <T>(key: string) => {
-    const { search } = useLocation();
-    const res = new URLSearchParams(search).get(key);
+    const [searchParams] = useSearchParams();
+    const res = searchParams.get(key);
     if (!res) {
         return undefined;
     }
