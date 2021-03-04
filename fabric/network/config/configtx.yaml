@@ -33,9 +33,6 @@ Organizations:
             Endorsement:
                 Type: Signature
                 Rule: "OR('Org1MSP.peer')"
-        AnchorPeers:
-            - Host: peer0.org1.example.com
-              Port: 7051
     - &Org2
         Name: Org2MSP
         ID: Org2MSP
@@ -53,9 +50,6 @@ Organizations:
             Endorsement:
                 Type: Signature
                 Rule: "OR('Org2MSP.peer')"
-        AnchorPeers:
-            - Host: peer0.org2.example.com
-              Port: 9051
 Capabilities:
     Channel: &ChannelCapabilities
         V2_0: true
@@ -85,6 +79,8 @@ Application: &ApplicationDefaults
         <<: *ApplicationCapabilities
 Orderer: &OrdererDefaults
     OrdererType: etcdraft
+    Addresses:
+        - orderer.example.com:7050
     EtcdRaft:
         Consenters:
         - Host: orderer.example.com
@@ -124,7 +120,7 @@ Channel: &ChannelDefaults
     Capabilities:
         <<: *ChannelCapabilities
 Profiles:
-    TwoOrgsOrdererGenesis:
+    TwoOrgsApplicationGenesis:
         <<: *ChannelDefaults
         Orderer:
             <<: *OrdererDefaults
@@ -132,14 +128,6 @@ Profiles:
                 - *OrdererOrg
             Capabilities:
                 <<: *OrdererCapabilities
-        Consortiums:
-            SampleConsortium:
-                Organizations:
-                    - *Org1
-                    - *Org2
-    TwoOrgsChannel:
-        Consortium: SampleConsortium
-        <<: *ChannelDefaults
         Application:
             <<: *ApplicationDefaults
             Organizations:

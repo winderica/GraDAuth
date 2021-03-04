@@ -1,59 +1,46 @@
-#!/bin/bash
+. scripts/envVar.sh
 
 CHANNEL_NAME="$1"
+DELAY="1"
+MAX_RETRY="10"
 
-export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
-export CORE_PEER_TLS_ENABLED=true
-export PEER0_ORG1_CA=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
-export PEER0_ORG2_CA=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
-export FABRIC_CFG_PATH=${PWD}/config
-
-setGlobals() {
-  if [ "$1" -eq 1 ]; then
-    export CORE_PEER_LOCALMSPID="Org1MSP"
-    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG1_CA
-    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
-    export CORE_PEER_ADDRESS=localhost:7051
-  elif [ "$1" -eq 2 ]; then
-    export CORE_PEER_LOCALMSPID="Org2MSP"
-    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG2_CA
-    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
-    export CORE_PEER_ADDRESS=localhost:9051
-  fi
-}
-
-createChannelTx() {
-  configtxgen -profile TwoOrgsChannel -outputCreateChannelTx ./channel-artifacts/"${CHANNEL_NAME}".tx -channelID "$CHANNEL_NAME"
-}
-
-createAncorPeerTx() {
-  for orgmsp in Org1MSP Org2MSP; do
-    configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel-artifacts/${orgmsp}anchors.tx -channelID "$CHANNEL_NAME" -asOrg ${orgmsp}
-  done
+createChannelGenesisBlock() {
+	configtxgen -profile TwoOrgsApplicationGenesis -outputBlock ./channel-artifacts/${CHANNEL_NAME}.block -channelID $CHANNEL_NAME
 }
 
 createChannel() {
-  setGlobals 1
-  peer channel create -o localhost:7050 -c "$CHANNEL_NAME" --ordererTLSHostnameOverride orderer.example.com -f ./channel-artifacts/"${CHANNEL_NAME}".tx --outputBlock ./channel-artifacts/"${CHANNEL_NAME}".block --tls "$CORE_PEER_TLS_ENABLED" --cafile "$ORDERER_CA"
+	setGlobals 1
+	local rc=1
+	local COUNTER=1
+	while [ $rc -ne 0 -a $COUNTER -lt $MAX_RETRY ] ; do
+		sleep $DELAY
+		osnadmin channel join --channelID $CHANNEL_NAME --config-block ./channel-artifacts/${CHANNEL_NAME}.block -o localhost:7053 --ca-file "$ORDERER_CA" --client-cert "$ORDERER_ADMIN_TLS_SIGN_CERT" --client-key "$ORDERER_ADMIN_TLS_PRIVATE_KEY"
+		res=$?
+		let rc=$res
+		COUNTER=$(expr $COUNTER + 1)
+	done
 }
 
 joinChannel() {
-  setGlobals "$1"
-  peer channel join -b ./channel-artifacts/"$CHANNEL_NAME".block
+  setGlobals $1
+	local rc=1
+	local COUNTER=1
+	while [ $rc -ne 0 -a $COUNTER -lt $MAX_RETRY ] ; do
+    sleep $DELAY
+    peer channel join -b ./channel-artifacts/${CHANNEL_NAME}.block
+    res=$?
+		let rc=$res
+		COUNTER=$(expr $COUNTER + 1)
+	done
 }
 
-updateAnchorPeers() {
-  setGlobals "$1"
-  peer channel update -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com -c "$CHANNEL_NAME" -f ./channel-artifacts/${CORE_PEER_LOCALMSPID}anchors.tx --tls "$CORE_PEER_TLS_ENABLED" --cafile "$ORDERER_CA"
+setAnchorPeer() {
+  docker exec cli bash ./scripts/setAnchorPeer.sh $1 $CHANNEL_NAME
 }
 
-createChannelTx
-createAncorPeerTx
-
+createChannelGenesisBlock
 createChannel
-
 joinChannel 1
 joinChannel 2
-
-updateAnchorPeers 1
-updateAnchorPeers 2
+setAnchorPeer 1
+setAnchorPeer 2

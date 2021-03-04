@@ -1,15 +1,15 @@
 #!/bin/bash
 
-export PATH=${PWD}/bin:${PWD}:$PATH
+export PATH=${PWD}/bin:$PATH
 export FABRIC_CFG_PATH=${PWD}/config
-export VERBOSE=false
 
 function clearContainers() {
-  docker rm -f "$(docker ps -a | awk '($2 ~ /dev-peer.*/) {print $1}')"
+  docker rm -f $(docker ps -aq --filter label=service=hyperledger-fabric) 2>/dev/null || true
+  docker rm -f $(docker ps -aq --filter name='dev-peer*') 2>/dev/null || true
 }
 
 function removeUnwantedImages() {
-  docker rm -f "$(docker images | awk '($1 ~ /dev-peer.*/) {print $3}')"
+  docker image rm -f $(docker images -aq --filter reference='dev-peer*') 2>/dev/null || true
 }
 
 function createOrgs() {
@@ -18,21 +18,23 @@ function createOrgs() {
   fi
   docker-compose -f "$COMPOSE_FILE_CA" up -d 2>&1
   . organizations/fabric-ca/registerEnroll.sh
-  sleep 10
+  while :
+    do
+      if [ ! -f "organizations/fabric-ca/org1/tls-cert.pem" ]; then
+        sleep 1
+      else
+        break
+      fi
+    done
   createOrg1
   createOrg2
   createOrderer
   ./organizations/ccp-generate.sh
 }
 
-function createConsortium() {
-  configtxgen -profile TwoOrgsOrdererGenesis -channelID system-channel -outputBlock ./system-genesis-block/genesis.block
-}
-
 function networkUp() {
   if [ ! -d "organizations/peerOrganizations" ]; then
     createOrgs
-    createConsortium
   fi
   docker-compose -f "${COMPOSE_FILE_BASE}" -f "${COMPOSE_FILE_COUCH}" up -d
 }
@@ -46,7 +48,6 @@ function createChannel() {
 
 function deployCC() {
   scripts/deployCC.sh "$CHANNEL_NAME" "$CHAINCODE_NAME"
-  exit 0
 }
 
 function networkDown() {
@@ -54,11 +55,11 @@ function networkDown() {
   if [ "$MODE" != "restart" ]; then
     clearContainers
     removeUnwantedImages
-    rm -rf system-genesis-block/*.block organizations/peerOrganizations organizations/ordererOrganizations
-    rm -rf organizations/fabric-ca/org1/msp organizations/fabric-ca/org1/tls-cert.pem organizations/fabric-ca/org1/ca-cert.pem organizations/fabric-ca/org1/IssuerPublicKey organizations/fabric-ca/org1/IssuerRevocationPublicKey organizations/fabric-ca/org1/fabric-ca-server.db
-    rm -rf organizations/fabric-ca/org2/msp organizations/fabric-ca/org2/tls-cert.pem organizations/fabric-ca/org2/ca-cert.pem organizations/fabric-ca/org2/IssuerPublicKey organizations/fabric-ca/org2/IssuerRevocationPublicKey organizations/fabric-ca/org2/fabric-ca-server.db
-    rm -rf organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db
-    rm -rf channel-artifacts log.txt "$CHAINCODE_NAME".tar.gz
+    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf system-genesis-block/*.block organizations/peerOrganizations organizations/ordererOrganizations'
+    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/org1/msp organizations/fabric-ca/org1/tls-cert.pem organizations/fabric-ca/org1/ca-cert.pem organizations/fabric-ca/org1/IssuerPublicKey organizations/fabric-ca/org1/IssuerRevocationPublicKey organizations/fabric-ca/org1/fabric-ca-server.db'
+    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/org2/msp organizations/fabric-ca/org2/tls-cert.pem organizations/fabric-ca/org2/ca-cert.pem organizations/fabric-ca/org2/IssuerPublicKey organizations/fabric-ca/org2/IssuerRevocationPublicKey organizations/fabric-ca/org2/fabric-ca-server.db'
+    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db'
+    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf channel-artifacts *.tar.gz'
   fi
 }
 
