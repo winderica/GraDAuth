@@ -183,21 +183,21 @@ declare module 'mcl' {
 
             PrecomputedG2: PrecomputedG2;
 
-            neg<T = Fr | GT | G1 | G2>(x: T): T;
+            neg<T = Fr | GT | G1 | G2 | Fp | Fp2>(x: T): T;
 
-            sqr<T = Fr | GT>(x: T): T;
+            sqr<T = Fr | GT | Fp | Fp2>(x: T): T;
 
-            inv<T = Fr | GT>(x: T): T;
+            inv<T = Fr | GT | Fp | Fp2>(x: T): T;
 
             normalize<T = G1 | G2>(x: T): T;
 
-            add<T = Fr | GT | G1 | G2>(x: T, y: T): T;
+            add<T = Fr | GT | G1 | G2 | Fp | Fp2>(x: T, y: T): T;
 
-            sub<T = Fr | GT | G1 | G2>(x: T, y: T): T;
+            sub<T = Fr | GT | G1 | G2 | Fp | Fp2>(x: T, y: T): T;
 
-            mul<T = Fr | GT | G1 | G2>(x: T, y: T extends GT ? GT : Fr): T;
+            mul<T = Fr | GT | G1 | G2 | Fp | Fp2>(x: T, y: T extends GT ? GT : Fr): T;
 
-            div<T = Fr | GT>(x: T, y: T): T;
+            div<T = Fr | GT | Fp | Fp2>(x: T, y: T): T;
 
             dbl<T = G1 | G2>(x: T): T;
 
