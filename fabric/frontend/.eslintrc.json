@@ -16,12 +16,10 @@
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
-    "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking"
   ],
   "plugins": [
-    "react",
     "@typescript-eslint"
   ],
   "rules": {
@@ -78,10 +76,5 @@
   "env": {
     "browser": true,
     "es6": true
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
   }
 }
