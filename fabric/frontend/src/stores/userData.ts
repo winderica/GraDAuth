@@ -5,11 +5,10 @@ import { TaggedUserData, UserData } from '../constants/types';
 export class UserDataStore {
     data: UserData;
 
-    initialized: boolean;
+    initialized = false;
 
     constructor(data: UserData = {}) {
         this.data = data;
-        this.initialized = false;
         makeAutoObservable(this);
     }
 

@@ -1,7 +1,7 @@
 import { makeAutoObservable } from 'mobx';
 
 export class IdentityStore {
-    password = '';
+    password = sessionStorage.getItem('password') || '';
 
     constructor() {
         makeAutoObservable(this);
@@ -9,5 +9,6 @@ export class IdentityStore {
 
     setPassword(password: string) {
         this.password = password;
+        sessionStorage.setItem('password', password);
     }
 }
