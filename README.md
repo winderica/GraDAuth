@@ -39,7 +39,7 @@ only `configtxgen`, `fabric-ca-client`, `osnadmin` and `peer` are needed.
 directory: `fabric/chaincode/`
 
 ```shell
-yarn
+yarn --ignore-engines
 ```
 
 ### Install PreDAuth frontend dependencies
@@ -47,7 +47,7 @@ yarn
 directory: `fabric/frontend/`
 
 ```shell
-yarn
+yarn --ignore-engines
 ```
 
 ### Install App frontend dependencies
