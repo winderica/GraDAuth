@@ -28,7 +28,7 @@ export class AES {
         return uint8ArrayToBase64(new Uint8Array(
             await crypto.subtle.encrypt(
                 {
-                    name: 'AES-CBC',
+                    name: this.#algorithm,
                     iv: this.#iv
                 },
                 await this.#key,
@@ -40,7 +40,7 @@ export class AES {
     async decrypt(encrypted: string) {
         return new TextDecoder().decode(await crypto.subtle.decrypt(
             {
-                name: 'AES-CBC',
+                name: this.#algorithm,
                 iv: this.#iv,
             },
             await this.#key,
