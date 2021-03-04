@@ -22,13 +22,3 @@ export interface Data {
 export interface RK {
     [tag: string]: string;
 }
-
-export interface Backup {
-    rk: RK;
-    email: string;
-}
-
-export interface Code {
-    code: string;
-    time: number;
-}
