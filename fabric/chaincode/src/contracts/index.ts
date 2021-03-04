@@ -1,36 +1,37 @@
-import got from 'got';
 import { Context, Contract } from 'fabric-contract-api';
-import { DataLedger, IdentityLedger } from '../ledger';
-import { verify } from '../utils/ecdsa';
+import got from 'got';
+
+import { DataLedger } from '../ledger';
 import { G1, G2, PRE } from '../utils/pre';
-import { Data, PK, Request, RK } from '../constants/types';
+import { verify } from '../utils/verify';
+
+interface Data {
+    key: {
+        ca0: string;
+        ca1: string;
+    };
+    data: string;
+    iv: string;
+}
 
 class PreDAuthContext extends Context {
     data: DataLedger;
-    identity: IdentityLedger;
 
     constructor() {
         super();
         this.data = new DataLedger(this);
-        this.identity = new IdentityLedger(this);
     }
 }
 
 export class PreDAuth extends Contract {
     pre!: PRE;
+
     g!: G1;
+
     h!: G2;
 
     createContext() {
         return new PreDAuthContext();
-    }
-
-    private handleReEncrypt(encrypted: Data, rk: RK) {
-        return Object.fromEntries(Object.entries(rk).map(([tag, rk]) => {
-            const { key, data, iv } = encrypted[tag];
-            const { cb0, cb1 } = this.pre.reEncrypt(key, rk);
-            return [tag, { data, key: { cb0, cb1 }, iv, }];
-        }));
     }
 
     async init(_: PreDAuthContext, str1: string, str2: string) {
@@ -41,38 +42,49 @@ export class PreDAuth extends Contract {
         this.h = h;
     }
 
-    async getIdentity(ctx: PreDAuthContext, id: string) {
-        return await ctx.identity.get([id]);
-    }
-
-    async setIdentity(ctx: PreDAuthContext, id: string, request: string) {
-        const { nonce, signature, payload }: Request<PK> = JSON.parse(request);
-        const publicKey = await this.getIdentity(ctx, id) || payload.publicKey;
-        if (!verify(nonce, publicKey, signature)) {
-            throw new Error('Verification failed');
+    async getData(ctx: PreDAuthContext, json: string) {
+        const tags: string[] = JSON.parse(json);
+        const result: Record<string, Data> = {};
+        for (const tag of tags) {
+            result[tag] = JSON.parse(await ctx.data.get([tag]));
         }
-        await ctx.identity.set([id], payload.publicKey);
+        return JSON.stringify(result);
     }
 
-    async getData(ctx: PreDAuthContext, id: string) {
-        return await ctx.data.get([id]);
-    }
-
-    async setData(ctx: PreDAuthContext, id: string, request: string) {
-        const { nonce, signature, payload }: Request<Data> = JSON.parse(request);
-        if (!verify(nonce, await this.getIdentity(ctx, id), signature)) {
-            throw new Error('Verification failed');
+    async setData(ctx: PreDAuthContext, json: string) {
+        const data: [string, Data, string][] = JSON.parse(json);
+        for (const [tag, value, proof] of data) {
+            if (!verify(tag, proof)) {
+                throw new Error('Verification failed');
+            }
+            await ctx.data.set([tag], JSON.stringify(value));
         }
-        await ctx.data.set([id], JSON.stringify(payload));
     }
 
-    async reEncrypt(ctx: PreDAuthContext, id: string, request: string, to: string) {
-        const { nonce, signature, payload: tagRK }: Request<RK> = JSON.parse(request);
-        if (!verify(nonce, await this.getIdentity(ctx, id), signature)) {
-            throw new Error('Verification failed');
+    async delData(ctx: PreDAuthContext, json: string) {
+        const data: [string, string][] = JSON.parse(json);
+        for (const [tag, proof] of data) {
+            if (!verify(tag, proof)) {
+                throw new Error('Verification failed');
+            }
+            await ctx.data.del([tag]);
         }
-        const encrypted: Data = JSON.parse(await this.getData(ctx, id));
-        await got.post(to, { json: this.handleReEncrypt(encrypted, tagRK) });
+    }
+
+    async reEncrypt(ctx: PreDAuthContext, json: string, to: string) {
+        const data: [string, string, string][] = JSON.parse(json);
+        for (const [tag, , proof] of data) {
+            if (!verify(tag, proof)) {
+                throw new Error('Verification failed');
+            }
+        }
+        await got.post(to, {
+            json: await Promise.all(data.map(async ([tag, rk]) => {
+                const { key, data, iv }: Data = JSON.parse(await ctx.data.get([tag]));
+                const { cb0, cb1 } = this.pre.reEncrypt(key, rk);
+                return { data, key: { cb0, cb1 }, iv };
+            })),
+        });
     }
 
     getGH() {
@@ -82,4 +94,3 @@ export class PreDAuth extends Contract {
         });
     }
 }
-

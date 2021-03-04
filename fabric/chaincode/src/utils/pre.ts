@@ -12,7 +12,7 @@ export class PRE {
     generatorGen(g: string, h: string, fromHex = false) {
         return {
             g: fromHex ? this.mcl.deserializeHexStrToG1(g) : this.mcl.hashAndMapToG1(g),
-            h: fromHex ? this.mcl.deserializeHexStrToG2(h) : this.mcl.hashAndMapToG2(h)
+            h: fromHex ? this.mcl.deserializeHexStrToG2(h) : this.mcl.hashAndMapToG2(h),
         };
     }
 
@@ -51,13 +51,16 @@ export class PRE {
     }
 
     reEncrypt({ ca0, ca1 }: { ca0: string; ca1: string }, reKey: string) {
-        const cb1 = this.mcl.pairing(this.deserialize(ca1, 'G1'), this.deserialize(reKey, 'G2')); // Cb1 = e(g^(ra), h^(b/a)) = e(g, h)^(rb) = Z^(rb)
+        // Cb1 = e(g^(ra), h^(b/a)) = e(g, h)^(rb) = Z^(rb)
+        const cb1 = this.mcl.pairing(this.deserialize(ca1, 'G1'), this.deserialize(reKey, 'G2'));
         return { cb0: ca0, cb1: this.serialize(cb1) }; // Cb0 = Ca0
     }
 
     reDecrypt({ cb0, cb1 }: { cb0: string; cb1: string }, sk: Fr) {
-        const divisor = this.mcl.pow(this.deserialize(cb1, 'GT'), this.mcl.inv(sk)); // (Z^(rb))^(1/Skb) = (Z^(rb))^(1/b) = Z^r
-        const reDecrypted = this.mcl.sub(this.deserialize(cb0, 'Fr'), this.mcl.hashToFr(divisor.serialize())); // Cb0/Z^r = m*Z^r/Z^r = m
+        // (Z^(rb))^(1/Skb) = (Z^(rb))^(1/b) = Z^r
+        const divisor = this.mcl.pow(this.deserialize(cb1, 'GT'), this.mcl.inv(sk));
+        // Cb0/Z^r = m*Z^r/Z^r = m
+        const reDecrypted = this.mcl.sub(this.deserialize(cb0, 'Fr'), this.mcl.hashToFr(divisor.serialize()));
         return this.serialize(reDecrypted);
     }
 
@@ -90,9 +93,13 @@ export class PRE {
     }
 
     deserialize(str: string, group: 'G1'): G1;
+
     deserialize(str: string, group: 'G2'): G2;
+
     deserialize(str: string, group: 'GT'): GT;
+
     deserialize(str: string, group: 'Fr'): Fr;
+
     deserialize(str: string, group: 'G1' | 'G2' | 'GT' | 'Fr') {
         switch (group) {
             case 'Fr':

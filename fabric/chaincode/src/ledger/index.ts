@@ -11,9 +11,13 @@ abstract class StateLedger {
         );
     }
 
-    async get(attributes: string[]) {
+    async get(attributes: string[], throwIfEmpty = true) {
         const data = await this.ctx.stub.getState(this.ctx.stub.createCompositeKey(this.name, attributes));
-        return Buffer.from(data).toString('utf8');
+        const result = Buffer.from(data).toString('utf8');
+        if (throwIfEmpty && !result) {
+            throw new Error(`Data of [${attributes.join(',')}] is empty`);
+        }
+        return result;
     }
 
     async del(attributes: string[]) {
@@ -24,11 +28,5 @@ abstract class StateLedger {
 export class DataLedger extends StateLedger {
     constructor(ctx: Context) {
         super(ctx, 'dataLedger');
-    }
-}
-
-export class IdentityLedger extends StateLedger {
-    constructor(ctx: Context) {
-        super(ctx, 'identityLedger');
     }
 }
