@@ -1,4 +1,6 @@
-# PreDAuth
+# GraDAuth
+
+GradAuth Reinforces Anonymity in Decentralized Authorization
 
 ## Folder structure
 
