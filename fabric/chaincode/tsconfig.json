@@ -4,14 +4,11 @@
     "lib": [
       "esnext"
     ],
-    "typeRoots": [
-      "typings",
-      "node_modules/@types"
-    ],
     "outDir": "dist",
     "pretty": true,
     "module": "CommonJS",
     "resolveJsonModule": true,
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "strict": true,
@@ -20,8 +17,8 @@
     "noImplicitReturns": true,
     "noUnusedParameters": true
   },
-  "exclude": [
-    "node_modules",
-    "dist"
+  "include": [
+    "src",
+    "types"
   ]
 }

@@ -4,10 +4,11 @@
   "license": "MIT",
   "main": "./index.js",
   "dependencies": {
-    "fabric-contract-api": "^2.2.0",
-    "fabric-shim": "^2.2.0",
+    "@guildofweavers/genstark": "^0.7.6",
+    "fabric-contract-api": "^2.2.1",
+    "got": "^11.8.2",
     "mcl": "file:./mcl",
-    "nodemailer": "^6.4.10"
+    "fabric-shim": "^2.2.1"
   },
   "scripts": {
     "start": "fabric-chaincode-node start"
