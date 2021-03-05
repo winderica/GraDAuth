@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, protocol } from 'electron';
 
 import { hashTag } from './utils/hashTag';
 import { poseidonHashJS, serializePoseidon } from './utils/poseidonHashJS';
 import { prove } from './utils/prove';
-import { addAdmin, addUser, getContract } from './utils/wallet';
+import { getContract } from './utils/wallet';
 
 ipcMain.on('generators', async (event) => {
     try {
@@ -84,9 +84,6 @@ ipcMain.on('delData', async (event, tags: string[], password: string) => {
 });
 
 app.on('ready', async () => {
-    await addAdmin(1);
-    await addAdmin(2);
-    await addUser('user');
     const mainWindow = new BrowserWindow({
         width: 1280,
         height: 720,
@@ -96,8 +93,14 @@ app.on('ready', async () => {
             contextIsolation: false,
         },
     });
-
-    await mainWindow.loadURL('http://localhost:8000');
+    protocol.registerFileProtocol('gradauth', (request) => {
+        console.log(request);
+    });
+    try {
+        await mainWindow.loadFile('./index.html');
+    } catch {
+        await mainWindow.loadURL('http://localhost:8000');
+    }
     mainWindow.webContents.openDevTools();
 });
 
