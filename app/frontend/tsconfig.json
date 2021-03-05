@@ -6,7 +6,7 @@
       "dom"
     ],
     "typeRoots": [
-      "typings",
+      "types",
       "node_modules/@types"
     ],
     "module": "esnext",
@@ -34,6 +34,7 @@
     "dist"
   ],
   "include": [
-    "src"
+    "src",
+    "types"
   ]
 }

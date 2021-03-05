@@ -1,32 +1,30 @@
-import React, { FC, useEffect } from 'react';
 import { Button, Card, CardContent, Paper, TextField, Typography } from '@material-ui/core';
+import React, { FC, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import YouChat from '../assets/YouChat.png';
-
-import { useStyles } from '../styles/signup';
-import { RouteComponentProps } from '@reach/router';
 import { useAppInfo } from '../providers/appInfo';
+import { useStyles } from '../styles/signup';
 
-export const Signup: FC<RouteComponentProps> = ({ navigate }) => {
+export const Signup: FC = () => {
+    const navigate = useNavigate();
     const classes = useStyles();
     const appInfo = useAppInfo();
     useEffect(() => {
         void (async () => {
-            const { loggedIn } = await (await fetch(`${process.env.REACT_APP_APP_BACKEND}/status`, { credentials: 'include' })).json();
+            const { loggedIn } = await (await fetch(`${import.meta.env.REACT_APP_APP_BACKEND}/status`, { credentials: 'include' })).json();
             if (loggedIn) {
-                if (!navigate) {
-                    throw new Error('How could this happen?');
-                }
-                await navigate('/dashboard');
+                navigate('/dashboard');
             }
         })();
     }, [navigate]);
     const handleClick = () => {
-        window.location.href = `${process.env.REACT_APP_GRADAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
+        window.location.href = `${import.meta.env.REACT_APP_GRADAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
             type: 'get',
             id: 'YouChat',
             pk: appInfo.pk,
             callback: appInfo.callback,
-            redirect: `${process.env.REACT_APP_APP_FRONTEND}/dashboard`,
+            redirect: `${import.meta.env.REACT_APP_APP_FRONTEND}/dashboard`,
             data: appInfo.data,
         }))}`;
     };
@@ -40,11 +38,13 @@ export const Signup: FC<RouteComponentProps> = ({ navigate }) => {
                 </div>
                 <Card className={classes.card} elevation={5}>
                     <CardContent className={classes.content}>
-                        <TextField variant="outlined" label='邮箱' fullWidth />
-                        <TextField variant="outlined" label='用户名' fullWidth />
-                        <TextField variant="outlined" label='密码' type='password' fullWidth />
+                        <TextField variant='outlined' label='邮箱' fullWidth />
+                        <TextField variant='outlined' label='用户名' fullWidth />
+                        <TextField variant='outlined' label='密码' type='password' fullWidth />
                         <Button fullWidth variant='contained' color='primary' size='large'>注册</Button>
-                        <Button fullWidth variant='outlined' color='primary' size='large' onClick={handleClick}>使用GraDAuth登录</Button>
+                        <Button fullWidth variant='outlined' color='primary' size='large' onClick={handleClick}>
+                            使用GraDAuth登录
+                        </Button>
                         <Typography variant='caption' color='textSecondary'>* 注册即代表您同意我们的服务条款与隐私政策</Typography>
                     </CardContent>
                 </Card>

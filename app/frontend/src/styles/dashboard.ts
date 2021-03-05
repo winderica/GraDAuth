@@ -1,4 +1,5 @@
 import { makeStyles } from '@material-ui/core/styles';
+
 import { primary } from './global';
 
 export const useStyles = makeStyles(({ spacing }) => ({
@@ -14,16 +15,16 @@ export const useStyles = makeStyles(({ spacing }) => ({
     },
     avatar: {
         width: spacing(10),
-        height: spacing(10)
+        height: spacing(10),
     },
     profile: {
         marginLeft: spacing(2),
-        minWidth: spacing(40)
+        minWidth: spacing(40),
     },
     buttonContainer: {
         padding: spacing(2),
         '& :first-child': {
-            marginLeft: 'auto'
-        }
-    }
+            marginLeft: 'auto',
+        },
+    },
 }));

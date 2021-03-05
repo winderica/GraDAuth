@@ -1,4 +1,5 @@
 import { makeStyles } from '@material-ui/core/styles';
+
 import { primary } from './global';
 
 export const useStyles = makeStyles(({ spacing, palette }) => ({
@@ -26,7 +27,7 @@ export const useStyles = makeStyles(({ spacing, palette }) => ({
     },
     logo: {
         width: '90%',
-        filter: `drop-shadow(30px 10px 4px ${primary[300]})`
+        filter: `drop-shadow(30px 10px 4px ${primary[300]})`,
     },
     card: {
         marginLeft: 'auto',
@@ -37,6 +38,6 @@ export const useStyles = makeStyles(({ spacing, palette }) => ({
         width: spacing(50),
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-around'
-    }
+        justifyContent: 'space-around',
+    },
 }));

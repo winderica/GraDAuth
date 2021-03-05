@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles';
-import { blueGrey, deepOrange } from '@material-ui/core/colors';
 import { createMuiTheme } from '@material-ui/core';
+import { blueGrey, deepOrange } from '@material-ui/core/colors';
+import { makeStyles } from '@material-ui/core/styles';
 
 export const useStyles = makeStyles(() => ({
     '@global': {
@@ -16,7 +16,7 @@ export const useStyles = makeStyles(() => ({
             '-webkit-tap-highlight-color': 'transparent',
         },
         'html, body': {
-            margin: 0
+            margin: 0,
         },
     },
 }));
@@ -28,5 +28,5 @@ export const theme = createMuiTheme({
     palette: {
         primary,
         secondary,
-    }
+    },
 });

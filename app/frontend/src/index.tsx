@@ -1,10 +1,8 @@
-import React, { StrictMode } from 'react';
+import React from 'react';
 import { render } from 'react-dom';
+
 import { App } from './views/App';
 
-render(
-    <StrictMode>
-        <App />
-    </StrictMode>,
-    document.querySelector('react')
-);
+render(<App />, document.querySelector('#root'));
+
+import.meta.hot?.accept();
