@@ -40,7 +40,7 @@ export const Home: FC = observer(() => {
                     <Button onClick={handleClick} disabled={!password}>OK</Button>
                 </DialogActions>
             </Dialog>
-            <img className={classes.logo} src={logo} alt='GradAuth logo' />
+            <img className={classes.logo} src={`.${logo}`} alt='GradAuth logo' />
             <div>
                 <Typography variant='h2' className={classes.header}>GradAuth</Typography>
                 <Typography variant='h5'>
