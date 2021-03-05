@@ -1,10 +1,13 @@
+import { decrypt } from './aes256gcm';
 import { PRE, Fr, G1, G2 } from './pre';
-import { AES } from './aes';
 
 export class Bob {
     readonly #g: G1;
+
     readonly #h: G2;
+
     readonly #sk: Fr;
+
     readonly #pk: G2;
 
     constructor(private readonly pre: PRE, g: string, h: string) {
@@ -22,9 +25,8 @@ export class Bob {
     reDecrypt(cipher: string, { cb0, cb1 }: { cb0: string; cb1: string }, iv: string) {
         const aesKey = this.pre.reDecrypt({
             cb0: this.pre.deserialize(cb0, 'Fr'),
-            cb1: this.pre.deserialize(cb1, 'GT')
+            cb1: this.pre.deserialize(cb1, 'GT'),
         }, this.#sk);
-        const aes = new AES(Buffer.from(aesKey, 'hex'), Buffer.from(iv, 'hex'));
-        return aes.decrypt(cipher);
+        return decrypt(cipher, aesKey, iv);
     }
 }
