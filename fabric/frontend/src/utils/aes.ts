@@ -7,17 +7,18 @@ export class AES {
 
     readonly #algorithm: string;
 
-    constructor(key: string, iv?: string, algorithm = 'AES-CBC') {
+    constructor(key: string, iv?: string, algorithm = 'AES-GCM') {
         this.#key = crypto.subtle.importKey(
             'raw',
             hexToUint8Array(key),
             {
                 name: algorithm,
+                length: 256,
             },
             false,
             ['encrypt', 'decrypt']
         );
-        this.#iv = iv ? hexToUint8Array(iv): crypto.getRandomValues(new Uint8Array(16));
+        this.#iv = iv ? hexToUint8Array(iv) : crypto.getRandomValues(new Uint8Array(algorithm === 'AES-GCM' ? 12 : 16));
         this.#algorithm = algorithm;
     }
 
