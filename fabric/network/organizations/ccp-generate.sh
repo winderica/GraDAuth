@@ -30,5 +30,3 @@ PEERPEM=organizations/peerOrganizations/org2.example.com/tlsca/tlsca.org2.exampl
 CAPEM=organizations/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem
 
 echo "$(json_ccp $ORG $P0PORT $CAPORT $PEERPEM $CAPEM)" > ../ca/assets/connection-org2.json
-
-cp ../ca/assets/*.json ../electron/assets/
