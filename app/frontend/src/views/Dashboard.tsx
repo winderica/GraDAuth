@@ -1,4 +1,14 @@
-import { Avatar, Button, Card, CardActions, CardContent, CardHeader, Divider, Tooltip, Typography } from '@material-ui/core';
+import {
+    Avatar,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    CardHeader,
+    Divider,
+    Tooltip,
+    Typography,
+} from '@material-ui/core';
 import React, { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,25 +29,25 @@ export const Dashboard: FC = () => {
     const appInfo = useAppInfo();
     useEffect(() => {
         void (async () => {
-            const { data } = await (await fetch(`${import.meta.env.REACT_APP_APP_BACKEND}/data`, { credentials: 'include' })).json();
-            if (!data) {
-                navigate('/');
-            } else {
-                setData(data);
-            }
+            const { data } = await (await fetch(`${import.meta.env.SNOWPACK_PUBLIC_APP_BACKEND}/data`, {
+                credentials: 'include',
+            })).json();
+            data ? setData(data) : navigate('/');
         })();
     }, [navigate]);
     const handleClick = () => {
-        window.location.href = `${import.meta.env.REACT_APP_GRADAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
-            type: 'set',
-            id: 'YouChat',
-            pk: appInfo.pk,
-            callback: appInfo.callback,
-            redirect: `${import.meta.env.REACT_APP_APP_FRONTEND}/dashboard`,
-            data: {
-                YouChatID: data?.id,
-            },
-        }))}`;
+        window.location.href = `${import.meta.env.SNOWPACK_PUBLIC_GRADAUTH_FRONTEND}/auth/?request=${encodeURIComponent(
+            JSON.stringify({
+                type: 'set',
+                id: 'YouChat',
+                pk: appInfo.pk,
+                callback: appInfo.callback,
+                redirect: `${import.meta.env.SNOWPACK_PUBLIC_APP_FRONTEND}/dashboard`,
+                data: {
+                    YouChatID: data?.id,
+                },
+            })
+        )}`;
     };
     const classes = useStyles();
     return data ? (
@@ -46,7 +56,9 @@ export const Dashboard: FC = () => {
                 <CardHeader title='Welcome' />
                 <Divider variant='middle' />
                 <CardContent className={classes.content}>
-                    <Avatar className={classes.avatar} src={data.avatar} alt={data.name}>{data.name.split(' ').map((i) => i[0]).join('')}</Avatar>
+                    <Avatar className={classes.avatar} src={data.avatar} alt={data.name}>{
+                        data.name.split(' ').map((i) => i[0]).join('')
+                    }</Avatar>
                     <div className={classes.profile}>
                         <Typography variant='h4'>{data.name}</Typography>
                         <Typography variant='body1' color='textSecondary'>{data.city}</Typography>

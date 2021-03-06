@@ -4,7 +4,7 @@ import { primary } from './global';
 
 export const useStyles = makeStyles(({ spacing, palette }) => ({
     root: {
-        height: '100%',
+        height: '100vh',
         background: primary[50],
         display: 'flex',
         alignItems: 'center',

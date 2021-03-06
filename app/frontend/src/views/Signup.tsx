@@ -12,21 +12,25 @@ export const Signup: FC = () => {
     const appInfo = useAppInfo();
     useEffect(() => {
         void (async () => {
-            const { loggedIn } = await (await fetch(`${import.meta.env.REACT_APP_APP_BACKEND}/status`, { credentials: 'include' })).json();
+            const { loggedIn } = await (await fetch(`${import.meta.env.SNOWPACK_PUBLIC_APP_BACKEND}/status`, {
+                credentials: 'include',
+            })).json();
             if (loggedIn) {
                 navigate('/dashboard');
             }
         })();
     }, [navigate]);
     const handleClick = () => {
-        window.location.href = `${import.meta.env.REACT_APP_GRADAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
-            type: 'get',
-            id: 'YouChat',
-            pk: appInfo.pk,
-            callback: appInfo.callback,
-            redirect: `${import.meta.env.REACT_APP_APP_FRONTEND}/dashboard`,
-            data: appInfo.data,
-        }))}`;
+        window.location.href = `${import.meta.env.SNOWPACK_PUBLIC_GRADAUTH_FRONTEND}/auth/?request=${encodeURIComponent(
+            JSON.stringify({
+                type: 'get',
+                id: 'YouChat',
+                pk: appInfo.pk,
+                callback: appInfo.callback,
+                redirect: `${import.meta.env.SNOWPACK_PUBLIC_APP_FRONTEND}/dashboard`,
+                data: appInfo.data,
+            })
+        )}`;
     };
     return (
         <div className={classes.root}>

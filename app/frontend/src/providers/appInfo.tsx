@@ -14,7 +14,9 @@ export const AppInfoProvider: FC = ({ children }) => {
     const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
     useEffect(() => {
         void (async () => {
-            const appInfo = await (await fetch(`${import.meta.env.REACT_APP_APP_BACKEND}/appInfo`, { credentials: 'include' })).json();
+            const appInfo = await (await fetch(`${import.meta.env.SNOWPACK_PUBLIC_APP_BACKEND}/appInfo`, {
+                credentials: 'include',
+            })).json();
             setAppInfo(appInfo);
         })();
     }, []);
