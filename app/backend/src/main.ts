@@ -1,3 +1,7 @@
+import { lookup } from 'dns';
+import { hostname } from 'os';
+import { promisify } from 'util';
+
 import cors from 'cors';
 import express, { json, urlencoded } from 'express';
 import session from 'express-session';
@@ -7,7 +11,7 @@ import { Bob } from './utils/bob';
 import { PRE } from './utils/pre';
 import { getContract } from './utils/wallet';
 
-const APP_BACKEND = 'http://127.0.0.1:4001';
+const PORT = 4001;
 
 const app = express();
 app.use(cors({
@@ -28,6 +32,7 @@ const fakeDB: Record<string, Record<string, string>> = {};
 const fakeTokenMap: Record<string, string> = {};
 
 void (async () => {
+    const { address } = await promisify(lookup)(hostname());
     await pre.init();
     const contract = await getContract('app');
     const result = await contract.evaluateTransaction('getGH');
@@ -43,7 +48,7 @@ void (async () => {
         res.json({
             pk: bob.pk,
             data: ['name', 'avatar', 'city', 'bio'],
-            callback: `${APP_BACKEND}/decrypt/${decryptToken}`,
+            callback: `http://${address}:${PORT}/decrypt/${decryptToken}`,
         });
     });
 
@@ -72,5 +77,5 @@ void (async () => {
         }
     });
 
-    app.listen(4001, '0.0.0.0');
+    app.listen(PORT, '0.0.0.0');
 })();
