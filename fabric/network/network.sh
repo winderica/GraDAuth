@@ -4,12 +4,12 @@ export PATH=${PWD}/bin:$PATH
 export FABRIC_CFG_PATH=${PWD}/config
 
 function clearContainers() {
-  docker rm -f $(docker ps -aq --filter label=service=hyperledger-fabric) 2>/dev/null || true
-  docker rm -f $(docker ps -aq --filter name='dev-peer*') 2>/dev/null || true
+  docker rm -f "$(docker ps -aq --filter label=service=hyperledger-fabric)" 2>/dev/null || true
+  docker rm -f "$(docker ps -aq --filter name='dev-peer*')" 2>/dev/null || true
 }
 
 function removeUnwantedImages() {
-  docker image rm -f $(docker images -aq --filter reference='dev-peer*') 2>/dev/null || true
+  docker image rm -f "$(docker images -aq --filter reference='dev-peer*')" 2>/dev/null || true
 }
 
 function createOrgs() {
@@ -60,8 +60,8 @@ function networkDown() {
     docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/org2/msp organizations/fabric-ca/org2/tls-cert.pem organizations/fabric-ca/org2/ca-cert.pem organizations/fabric-ca/org2/IssuerPublicKey organizations/fabric-ca/org2/IssuerRevocationPublicKey organizations/fabric-ca/org2/fabric-ca-server.db'
     docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db'
     docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf channel-artifacts *.tar.gz'
-    rm -rf ../electron/wallet/*.id
-    rm -rf ../electron/assets/*.json
+    rm -rf ../../*/*/wallet/*.id
+    rm -rf ../../*/*/assets/connection*.json
   fi
 }
 

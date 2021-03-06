@@ -4,9 +4,9 @@
     "lib": [
       "esnext"
     ],
-    "outDir": "dist",
     "pretty": true,
-    "module": "CommonJS",
+    "module": "esnext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,

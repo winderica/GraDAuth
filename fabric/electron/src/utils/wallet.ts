@@ -17,8 +17,7 @@ export const getContract = async (id: string) => {
 
     const gateway = new Gateway();
     await gateway.connect(ccp1, {
-        wallet,
-        identity: id,
+        identity: user,
         discovery: {
             enabled: true,
             asLocalhost: true,

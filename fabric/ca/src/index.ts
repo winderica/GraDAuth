@@ -6,20 +6,15 @@ import { Wallets, X509Identity } from 'fabric-network';
 import ccp1 from '../assets/connection-org1.json';
 import ccp2 from '../assets/connection-org2.json';
 
-const getWallet = async () => {
-    return await Wallets.newFileSystemWallet(path.join(process.cwd(), '../electron/wallet'));
-};
+const CAs = [ccp1.certificateAuthorities['ca.org1.example.com'], ccp2.certificateAuthorities['ca.org2.example.com']];
+
+const getWallet = () => Wallets.newFileSystemWallet(path.join(process.cwd(), 'wallet'));
 
 const addAdmin = async (org: 1 | 2 = 1) => {
-    const caInfo = [
-        ccp1.certificateAuthorities['ca.org1.example.com'],
-        ccp2.certificateAuthorities['ca.org2.example.com'],
-    ][org - 1];
-    const caTLSCACerts = caInfo.tlsCACerts.pem;
-    const ca = new FabricCAServices(caInfo.url, { trustedRoots: caTLSCACerts, verify: false }, caInfo.caName);
+    const { url, caName, tlsCACerts: { pem } } = CAs[org - 1];
+    const ca = new FabricCAServices(url, { trustedRoots: pem, verify: false }, caName);
 
     const wallet = await getWallet();
-
     if (await wallet.get(`admin${org}`)) {
         return;
     }
@@ -37,12 +32,9 @@ const addAdmin = async (org: 1 | 2 = 1) => {
     await wallet.put(`admin${org}`, x509Identity);
 };
 
-const addUser = async (id: string, attrs?: IKeyValueAttribute[], org: 1 | 2 = 1) => {
-    const caURL = [
-        ccp1.certificateAuthorities['ca.org1.example.com'],
-        ccp2.certificateAuthorities['ca.org2.example.com'],
-    ][org - 1].url;
-    const ca = new FabricCAServices(caURL);
+const addUser = async (id: string, org: 1 | 2 = 1, attrs?: IKeyValueAttribute[]) => {
+    const { url } = CAs[org - 1];
+    const ca = new FabricCAServices(url);
 
     const wallet = await getWallet();
     if (await wallet.get(id)) {
@@ -75,8 +67,7 @@ const addUser = async (id: string, attrs?: IKeyValueAttribute[], org: 1 | 2 = 1)
     await wallet.put(id, x509Identity);
 };
 
-void (async () => {
-    await addAdmin(1);
-    await addAdmin(2);
-    await addUser('user');
-})();
+await addAdmin(1);
+await addAdmin(2);
+await addUser('user', 1);
+await addUser('app', 2);
