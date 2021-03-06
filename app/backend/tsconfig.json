@@ -8,11 +8,11 @@
       "typings",
       "node_modules/@types"
     ],
-    "outDir": "dist",
     "pretty": true,
     "module": "CommonJS",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "strict": true,
