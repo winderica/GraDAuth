@@ -2,6 +2,7 @@ import { Fingerprint, Home, List } from '@material-ui/icons';
 import { observer } from 'mobx-react-lite';
 import React, { FC, useEffect, useState } from 'react';
 
+import { api } from '../api';
 import { useStores } from '../hooks/useStores';
 import { useStyles } from '../styles/frame';
 
@@ -32,6 +33,7 @@ export const Frame: FC = observer(({ children }) => {
 
     useEffect(() => {
         void (async () => {
+            await api.init();
             await keyStore.load();
             setInitialized(true);
         })();

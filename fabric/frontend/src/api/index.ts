@@ -9,6 +9,15 @@ ipcRenderer.on<[string]>('auth', (_, data) => {
 });
 
 class API {
+    init() {
+        return new Promise<void>((resolve, reject) => {
+            ipcRenderer.once('init', (_, { ok, payload }) => {
+                ok ? resolve() : reject(new Error(payload));
+            });
+            ipcRenderer.send('init');
+        });
+    }
+
     getGenerators() {
         return new Promise<Generators>((resolve, reject) => {
             ipcRenderer.once('generators', (_, { ok, payload }) => {
@@ -27,7 +36,7 @@ class API {
         });
     }
 
-    async setData(data: TaggedEncrypted, password: string) {
+    setData(data: TaggedEncrypted, password: string) {
         return new Promise<void>((resolve, reject) => {
             ipcRenderer.once('setData', (_, { ok, payload }) => {
                 ok ? resolve() : reject(new Error(payload));
@@ -36,7 +45,7 @@ class API {
         });
     }
 
-    async delData(tags: string[], password: string) {
+    delData(tags: string[], password: string) {
         return new Promise<void>((resolve, reject) => {
             ipcRenderer.once('delData', (_, { ok, payload }) => {
                 ok ? resolve() : reject(new Error(payload));
@@ -45,7 +54,7 @@ class API {
         });
     }
 
-    async reEncrypt(data: TaggedReKey, password: string, to: string) {
+    reEncrypt(data: TaggedReKey, password: string, to: string) {
         return new Promise<void>((resolve, reject) => {
             ipcRenderer.once('reEncrypt', (_, { ok, payload }) => {
                 ok ? resolve() : reject(new Error(payload));
