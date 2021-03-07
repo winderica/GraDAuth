@@ -25,7 +25,8 @@
     "wait-on": "^5.2.1"
   },
   "scripts": {
-    "build": "tsc && electron-builder --x64 --win --linux",
+    "build": "tsc && electron-builder",
+    "build:pacman": "tsc && electron-builder --linux pacman",
     "start": "tsc && wait-on http://127.0.0.1:8000 && electron .",
     "postinstall": "electron-builder install-app-deps",
     "lint": "eslint . --ext .js,.ts,.tsx --fix"
@@ -40,9 +41,6 @@
       "schemes": [
         "gradauth"
       ]
-    },
-    "linux": {
-      "target": "pacman"
     },
     "files": [
       "./dist/**/*",
