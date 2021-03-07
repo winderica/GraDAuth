@@ -20,18 +20,6 @@ export const Signup: FC = () => {
             }
         })();
     }, [navigate]);
-    const handleClick = () => {
-        window.location.href = `${import.meta.env.SNOWPACK_PUBLIC_GRADAUTH_FRONTEND}/auth/?request=${encodeURIComponent(
-            JSON.stringify({
-                type: 'get',
-                id: 'YouChat',
-                pk: appInfo.pk,
-                callback: appInfo.callback,
-                redirect: `${import.meta.env.SNOWPACK_PUBLIC_APP_FRONTEND}/dashboard`,
-                data: appInfo.data,
-            })
-        )}`;
-    };
     return (
         <div className={classes.root}>
             <Paper className={classes.container} elevation={10}>
@@ -46,7 +34,16 @@ export const Signup: FC = () => {
                         <TextField variant='outlined' label='用户名' fullWidth />
                         <TextField variant='outlined' label='密码' type='password' fullWidth />
                         <Button fullWidth variant='contained' color='primary' size='large'>注册</Button>
-                        <Button fullWidth variant='outlined' color='primary' size='large' onClick={handleClick}>
+                        <Button fullWidth variant='outlined' color='primary' size='large' href={
+                            `gradauth:${encodeURIComponent(JSON.stringify({
+                                type: 'get',
+                                id: 'YouChat',
+                                pk: appInfo.pk,
+                                callback: appInfo.callback,
+                                redirect: `${import.meta.env.SNOWPACK_PUBLIC_APP_FRONTEND}/dashboard`,
+                                data: appInfo.data,
+                            }))}`
+                        }>
                             使用GraDAuth登录
                         </Button>
                         <Typography variant='caption' color='textSecondary'>* 注册即代表您同意我们的服务条款与隐私政策</Typography>

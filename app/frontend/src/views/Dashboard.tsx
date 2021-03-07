@@ -35,20 +35,6 @@ export const Dashboard: FC = () => {
             data ? setData(data) : navigate('/');
         })();
     }, [navigate]);
-    const handleClick = () => {
-        window.location.href = `${import.meta.env.SNOWPACK_PUBLIC_GRADAUTH_FRONTEND}/auth/?request=${encodeURIComponent(
-            JSON.stringify({
-                type: 'set',
-                id: 'YouChat',
-                pk: appInfo.pk,
-                callback: appInfo.callback,
-                redirect: `${import.meta.env.SNOWPACK_PUBLIC_APP_FRONTEND}/dashboard`,
-                data: {
-                    YouChatID: data?.id,
-                },
-            })
-        )}`;
-    };
     const classes = useStyles();
     return data ? (
         <div className={classes.root}>
@@ -67,7 +53,18 @@ export const Dashboard: FC = () => {
                 </CardContent>
                 <CardActions className={classes.buttonContainer}>
                     <Tooltip title='为您在GraDAuth中设置YouChat ID，以供其它应用获取'>
-                        <Button onClick={handleClick} variant='outlined' color='primary'>连携</Button>
+                        <Button variant='outlined' color='primary' href={
+                            `gradauth:${encodeURIComponent(JSON.stringify({
+                                type: 'set',
+                                id: 'YouChat',
+                                pk: appInfo.pk,
+                                callback: appInfo.callback,
+                                redirect: `${import.meta.env.SNOWPACK_PUBLIC_APP_FRONTEND}/dashboard`,
+                                data: {
+                                    YouChatID: data.id,
+                                },
+                            }))}`
+                        }>连携</Button>
                     </Tooltip>
                     <Button variant='contained' color='primary'>完成</Button>
                 </CardActions>
