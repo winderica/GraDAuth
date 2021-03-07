@@ -28,3 +28,9 @@ jobs:
 
       - working-directory: ./fabric/electron
         run: yarn && yarn build
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: ./fabric/electron/build
