@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import { app, shell, BrowserWindow } from 'electron';
 
 import './ipc';
@@ -24,7 +23,7 @@ if (!app.requestSingleInstanceLock()) {
         }
     });
 
-    app.on('ready', async () => {
+    app.on('ready', () => {
         mainWindow = new BrowserWindow({
             width: 1280,
             height: 720,
@@ -38,18 +37,12 @@ if (!app.requestSingleInstanceLock()) {
             event.preventDefault();
             void shell.openExternal(url);
         });
-        // mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        //     if (url.startsWith('http://') || url.startsWith('https://')) {
-        //         void shell.openExternal(url);
-        //     }
-        //     return { action: 'deny' };
-        // });
-        try {
-            await mainWindow.loadFile('./index.html');
-        } catch {
-            await mainWindow.loadURL('http://localhost:8000');
+        if (app.isPackaged) {
+            void mainWindow.loadFile('./index.html');
+        } else {
+            void mainWindow.loadURL('http://localhost:8000');
+            mainWindow.webContents.openDevTools();
         }
-        mainWindow.webContents.openDevTools();
     });
 
     app.on('window-all-closed', () => {
