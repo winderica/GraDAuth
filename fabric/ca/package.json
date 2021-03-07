@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "tsc && node --experimental-json-modules src/index.js",
-    "poststart": "for i in ../electron ../../app/backend; do cp -r assets wallet $i; done",
+    "poststart": "cp -r assets wallet ../../app/backend",
     "lint": "eslint . --ext .js,.ts,.tsx --fix"
   }
 }
