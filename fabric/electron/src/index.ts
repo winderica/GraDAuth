@@ -38,7 +38,7 @@ if (!app.requestSingleInstanceLock()) {
             void shell.openExternal(url);
         });
         if (app.isPackaged) {
-            void mainWindow.loadFile('./index.html');
+            void mainWindow.loadFile('renderer/index.html');
         } else {
             void mainWindow.loadURL('http://localhost:8000');
             mainWindow.webContents.openDevTools();

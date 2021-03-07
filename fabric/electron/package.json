@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "license": "MIT",
   "homepage": "/",
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "author": {
     "name": "winderica",
     "email": "winderica@gmail.com"
   },
   "dependencies": {
     "@guildofweavers/genstark": "^0.7.6",
+    "electron-store": "^7.0.2",
     "fabric-network": "^2.2.5"
   },
   "devDependencies": {
@@ -47,14 +48,7 @@
       "./dist/**/*",
       {
         "from": "../frontend/build",
-        "to": ".",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "wallet",
-        "to": "wallet",
+        "to": "renderer",
         "filter": [
           "**/*"
         ]
