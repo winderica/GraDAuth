@@ -1,9 +1,13 @@
 {
-  "name": "fabric-electron",
+  "name": "gradauth-electron",
   "version": "1.0.0",
   "license": "MIT",
   "homepage": "/",
   "main": "dist/src/index.js",
+  "author": {
+    "name": "winderica",
+    "email": "winderica@gmail.com"
+  },
   "dependencies": {
     "@guildofweavers/genstark": "^0.7.6",
     "fabric-network": "^2.2.5"
@@ -20,7 +24,7 @@
     "wait-on": "^5.2.1"
   },
   "scripts": {
-    "build": "tsc && electron-builder --win --linux",
+    "build": "tsc && electron-builder --x64 --win --linux",
     "start": "tsc && wait-on http://127.0.0.1:8000 && electron .",
     "postinstall": "electron-builder install-app-deps",
     "lint": "eslint . --ext .js,.ts,.tsx --fix"
@@ -29,6 +33,15 @@
     "appId": "Gra.D.Auth",
     "directories": {
       "output": "build"
+    },
+    "protocols": {
+      "name": "GraDAuth",
+      "schemes": [
+        "gradauth"
+      ]
+    },
+    "linux": {
+      "target": "pacman"
     },
     "files": [
       "./dist/**/*",
