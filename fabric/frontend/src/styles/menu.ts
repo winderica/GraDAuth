@@ -4,7 +4,7 @@ interface Props {
     open: boolean;
 }
 
-export const useStyles = makeStyles(({ transitions, mixins, spacing/*, breakpoints*/ }) => ({
+export const useStyles = makeStyles(({ transitions, mixins, spacing }) => ({
     drawerPaper: ({ open }: Props) => ({
         position: 'sticky',
         overflowX: 'hidden',
@@ -13,10 +13,6 @@ export const useStyles = makeStyles(({ transitions, mixins, spacing/*, breakpoin
             easing: transitions.easing.sharp,
             duration: open ? transitions.duration.enteringScreen : transitions.duration.leavingScreen,
         }),
-        // [breakpoints.down('sm')]: open ? {} : {
-        //     border: 0,
-        //     width: 0,
-        // },
     }),
     toolbar: {
         display: 'flex',
