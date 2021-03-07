@@ -14,14 +14,19 @@ GradAuth Reinforces Anonymity in Decentralized Authorization
 │       ├── src/
 │       └── ...
 ├── fabric/
+│   ├── ca/
+│   │   ├── src/
+│   │   └── ...
 │   ├── chaincode/
 │   │   ├── src/
 │   │   └── ...
 │   ├── electron/
 │   │   ├── src/
 │   │   └── ...
-│   └── frontend/
-│       ├── src/
+│   ├── frontend/
+│   │   ├── src/
+│   │   └── ...
+│   └── network/
 │       └── ...
 └── lib/
     ├── mcl
@@ -35,9 +40,17 @@ GradAuth Reinforces Anonymity in Decentralized Authorization
 
 directory: `fabric/network/`
 
-download from here: <https://github.com/hyperledger/fabric/releases>.
+download from [here](https://github.com/hyperledger/fabric/releases) and [here](https://github.com/hyperledger/fabric-ca/releases).
 
 only `configtxgen`, `fabric-ca-client`, `osnadmin` and `peer` are needed.
+
+### Install CA dependencies
+
+directory: `fabric/ca/`
+
+```shell
+yarn --ignore-engines
+```
 
 ### Install chaincode dependencies
 
@@ -76,7 +89,7 @@ yarn
 directory: `app/backend/`
 
 ```shell
-yarn
+yarn --ignore-engines
 ```
 
 ### Start network
@@ -103,9 +116,9 @@ directory: `fabric/network/`
 ./network.sh deployCC -n GraDAuth
 ```
 
-### Run GraDAuth electron
+### Run CA
 
-directory: `fabric/electron/`
+directory: `fabric/ca/`
 
 ```shell
 yarn start
@@ -114,6 +127,14 @@ yarn start
 ### Run GraDAuth frontend
 
 directory: `fabric/frontend/`
+
+```shell
+yarn start
+```
+
+### Run GraDAuth electron
+
+directory: `fabric/electron/`
 
 ```shell
 yarn start
@@ -138,3 +159,12 @@ yarn start
 ```
 
 URL: `http://127.0.0.1:3001`
+
+### Build frontend and electron
+
+```shell
+cd fabric/frontend
+yarn build
+cd ../electron
+yarn build
+```
