@@ -2,6 +2,12 @@ const { ipcRenderer } = window.require('electron');
 
 import { Generators, TaggedEncrypted, TaggedReKey } from '../constants/types';
 
+ipcRenderer.on<[string]>('auth', (_, data) => {
+    const { pathname } = new URL(data);
+    location.hash = `#/auth/?request=${pathname}`;
+    location.reload();
+});
+
 class API {
     getGenerators() {
         return new Promise<Generators>((resolve, reject) => {

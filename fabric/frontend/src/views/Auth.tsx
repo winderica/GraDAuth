@@ -6,7 +6,6 @@ import { Navigate } from 'react-router-dom';
 import { api } from '../api';
 import { Checkbox } from '../components/Checkbox';
 import { Table } from '../components/Table';
-import { Timer } from '../components/Timer';
 import { Checked } from '../constants/types';
 import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
@@ -38,7 +37,7 @@ interface AuthSettingRequest {
 type AuthRequest = AuthGettingRequest | AuthSettingRequest;
 
 const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) => {
-    const { identityStore, keyStore, userDataStore, notificationStore } = useStores();
+    const { identityStore, keyStore, userDataStore } = useStores();
     useUserData();
     const alice = useAlice();
     const classes = useStyles();
@@ -52,9 +51,7 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
         await apiWrapper(
             async () => {
                 await api.reEncrypt(data, identityStore.password, request.callback);
-                notificationStore.enqueueInfo(<>
-                    页面将在<Timer time={5} key={Date.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
-                </>);
+                open(request.redirect, '_blank');
             }, '正在提交重加密密钥', '成功提交重加密密钥'
         );
     };
@@ -91,7 +88,7 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
 });
 
 const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) => {
-    const { userDataStore, identityStore, keyStore, notificationStore } = useStores();
+    const { userDataStore, identityStore, keyStore } = useStores();
     useUserData();
     const alice = useAlice();
     const classes = useStyles();
@@ -104,9 +101,7 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
         await apiWrapper(async () => {
             await api.setData(encrypted, identityStore.password);
             await keyStore.set(dataKey);
-            notificationStore.enqueueInfo(<>
-                页面将在<Timer time={5} key={Date.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
-            </>);
+            open(request.redirect, '_blank');
         }, '正在提交加密数据', '成功加密并提交');
     };
 
