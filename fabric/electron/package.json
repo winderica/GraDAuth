@@ -54,7 +54,7 @@
       },
       {
         "from": "wallet",
-        "to": "dist/wallet",
+        "to": "wallet",
         "filter": [
           "**/*"
         ]
