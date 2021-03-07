@@ -37,7 +37,7 @@ export const Home: FC = observer(() => {
                     <TextField label='Password' type='password' fullWidth onChange={handleInput} />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClick} disabled={!password}>OK</Button>
+                    <Button color='primary' onClick={handleClick} disabled={!password}>OK</Button>
                 </DialogActions>
             </Dialog>
             <img className={classes.logo} src={`.${logo}`} alt='GradAuth logo' />
