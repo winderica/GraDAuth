@@ -1,9 +1,4 @@
-import {
-    TaggedEncrypted,
-    TaggedPreKeyPair,
-    TaggedUserDataArray,
-    UserDataArray,
-} from '../constants/types';
+import { TaggedEncrypted, TaggedPreKeyPair, TaggedUserDataArray, UserDataArray } from '../constants/types';
 
 import { Alice } from './alice';
 
@@ -29,8 +24,8 @@ export const decrypt = async (aliceInstance: Alice, data: TaggedEncrypted, dataK
         Object
             .entries<string>(JSON.parse(await aliceInstance.decrypt(encrypted, dataKey[tag].sk)))
             .forEach(([key, value]) => {
-            decrypted.push({ key, value, tag });
-        });
+                decrypted.push({ key, value, tag });
+            });
     }));
     return decrypted;
 };

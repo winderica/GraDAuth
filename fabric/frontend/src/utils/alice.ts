@@ -53,7 +53,6 @@ export class Alice {
             ca0: this.pre.deserialize(ca0, 'Fr'),
             ca1: this.pre.deserialize(ca1, 'G1'),
         }, this.pre.deserialize(sk, 'Fr'), this.#h);
-        const aes = new AES(aesKey, iv);
-        return aes.decrypt(data);
+        return new AES(aesKey, iv).decrypt(data);
     }
 }

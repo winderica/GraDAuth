@@ -48,12 +48,10 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
                 .filter(([, data]) => Object.keys(data).filter((key) => checked[key]).length)
                 .map(([tag]) => [tag, alice.reKey(request.pk, keyStore.dataKey[tag].sk)])
         );
-        await apiWrapper(
-            async () => {
-                await api.reEncrypt(data, identityStore.password, request.callback);
-                open(request.redirect, '_blank');
-            }, '正在提交重加密密钥', '成功提交重加密密钥'
-        );
+        await apiWrapper(async () => {
+            await api.reEncrypt(data, identityStore.password, request.callback);
+            open(request.redirect, '_blank');
+        }, '正在提交重加密密钥', '成功提交重加密密钥');
     };
 
     const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
