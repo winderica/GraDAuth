@@ -65,7 +65,7 @@ void (async () => {
             const data: { data: string; key: { cb0: string; cb1: string }; iv: string }[] = req.body;
             const { name, avatar, bio, city, id } = data
                 .map(({ data, key, iv }) => JSON.parse(bob.reDecrypt(data, key, iv)) as Record<string, string>)
-                .reduce((i, j) => ({ ...i, ...j }), { id: v4() });
+                .reduce((i, { key, value }) => ({ ...i, [key]: value }), { id: v4() });
             if (name && avatar && bio && city && id && fakeTokenMap[req.params.token]) {
                 fakeDB[fakeTokenMap[req.params.token]] = { name, avatar, bio, city, id };
                 res.sendStatus(200);
