@@ -38,9 +38,9 @@ export const Table: FC<Props> = observer(({ title, dataStore }) => {
             title={title}
             data={dataStore.dataArray}
             columns={[
-                { title: '键', field: 'key', grouping: false },
-                { title: '值', field: 'value', grouping: false },
-                { title: '标签', field: 'tag' },
+                { title: '键', field: 'key' },
+                { title: '值', field: 'value' },
+                { title: '标签', field: 'tag', editable: 'never', cellStyle: { fontFamily: 'monospace' } },
             ]}
             icons={{
                 Add: forwardSVGRef(AddBox),
@@ -62,14 +62,13 @@ export const Table: FC<Props> = observer(({ title, dataStore }) => {
                 ViewColumn: forwardSVGRef(ViewColumn),
             }}
             editable={{
-                /* eslint-disable @typescript-eslint/require-await */
+                // eslint-disable-next-line @typescript-eslint/require-await
                 onRowDelete: async ({ key }) => dataStore.del(key),
-                onRowAdd: async ({ key, value, tag }) => dataStore.set(key, value, tag),
-                onRowUpdate: async ({ key, value, tag }, oldData) => {
+                onRowAdd: ({ key, value }) => dataStore.set(key, value),
+                onRowUpdate: async ({ key, value }, oldData) => {
                     oldData && oldData.key !== key && dataStore.del(oldData.key);
-                    dataStore.set(key, value, tag);
+                    await dataStore.set(key, value);
                 },
-                /* eslint-enable @typescript-eslint/require-await */
             }}
             options={{
                 search: false,
@@ -77,15 +76,10 @@ export const Table: FC<Props> = observer(({ title, dataStore }) => {
                     padding: 16,
                     whiteSpace: 'nowrap',
                 },
-                grouping: true,
             }}
             localization={{
                 header: {
                     actions: '修改/删除',
-                },
-                grouping: {
-                    placeholder: '将标签列标题拖拽至此以进行分组',
-                    groupedBy: '分组：',
                 },
                 body: {
                     emptyDataSourceMessage: '暂无数据',

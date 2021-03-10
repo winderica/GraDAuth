@@ -12,13 +12,13 @@ import { useUserData } from '../hooks/useUserData';
 import { UserDataStore } from '../stores';
 import { useStyles } from '../styles/data';
 import { encrypt } from '../utils/aliceWrapper';
-import { apiWrapper } from '../utils/apiWrapper';
+import { asyncAction } from '../utils/asyncAction';
 
 export const Data: FC = observer(() => {
     const classes = useStyles();
     const stores = useStores();
-    const { userDataStore, identityStore, keyStore } = stores;
-    if (!identityStore.password) {
+    const { userDataStore, keyStore } = stores;
+    if (!userDataStore.password) {
         return <Navigate to='/' />;
     }
     const alice = useAlice();
@@ -31,13 +31,12 @@ export const Data: FC = observer(() => {
         const removedTags = new Set([...oldTags].filter((tag) => !newTags.has(tag)));
         const { dataKey, encrypted } = await encrypt(
             alice,
-            userDataStore.dataArrayGroupedByTag.filter(([tag]) => !removedTags.has(tag))
+            userDataStore.dataArray.filter(({ tag }) => !removedTags.has(tag))
         );
-        await apiWrapper(async () => {
-            await api.setData(encrypted, identityStore.password);
-            await api.delData([...removedTags], identityStore.password);
+        await asyncAction(async () => {
+            await Promise.all([api.setData(encrypted), api.delData([...removedTags])]);
             await keyStore.set(dataKey);
-        }, '正在提交加密数据', '成功加密并提交');
+        }, '提交加密数据');
     };
     return (
         <div className={classes.container}>
