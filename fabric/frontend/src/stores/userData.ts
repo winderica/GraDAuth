@@ -32,10 +32,7 @@ export class UserDataStore {
     }
 
     async set(key: string, value: string) {
-        this.data[key] = {
-            value,
-            tag: await sha256(`${this.id}.${this.password}.${JSON.stringify({ key, value })}`),
-        };
+        this.data[key] = { value, tag: await sha256(`${this.id}.${this.password}.${key}.${value}`) };
     }
 
     del(name: string) {
