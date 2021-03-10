@@ -1,7 +1,6 @@
 import { Assertion } from '@guildofweavers/genstark';
 
-import { rounds } from './poseidonHashJS';
-import { poseidonHashSTARK } from './poseidonHashSTARK';
+import { poseidonHashSTARK, rounds } from './poseidonHashSTARK';
 
 export const verify = (hash: string, proof: string) => {
     const controls = hash.match(/.{1,32}/g)!.map((i) => BigInt(`0x${i}`));

@@ -202,6 +202,10 @@ const source = `(module
     )
 )`;
 
+const fRounds = 8;
+const pRounds = 55;
+export const rounds = fRounds + pRounds;
+
 export const poseidonHashSTARK = instantiate(Buffer.from(source), 'ComputePoseidonHash', {
     hashAlgorithm: 'blake2s256',
     extensionFactor: 32,
