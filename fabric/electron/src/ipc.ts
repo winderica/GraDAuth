@@ -4,10 +4,9 @@ import { ipcMain, dialog } from 'electron';
 import Store from 'electron-store';
 import { Contract, Identity } from 'fabric-network';
 
-import { hashTag } from './utils/hashTag';
+import { parseTag } from './utils/parseTag';
 import { poseidonHashJS, serializePoseidon } from './utils/poseidonHashJS';
 import { prove } from './utils/prove';
-import { random } from './utils/random';
 import { getContract } from './utils/wallet';
 
 const store = new Store<{
@@ -46,9 +45,6 @@ ipcMain.on('init', async (event) => {
             } catch {
             }
         }
-        if (!store.get('randomId')) {
-            store.set('randomId', random());
-        }
         try {
             contract = await getContract(store.get('connection'), store.get('identity'));
         } catch {
@@ -70,13 +66,13 @@ ipcMain.on('generators', async (event) => {
     }
 });
 
-ipcMain.on('reEncrypt', async (event, data: Record<string, unknown>, password: string, to: string) => {
+ipcMain.on('reEncrypt', async (event, data: Record<string, unknown>, to: string) => {
     try {
         await contract.evaluateTransaction('reEncrypt', JSON.stringify(
             Object.entries(data).map(([k, v]) => {
-                const intermediateHash = hashTag(k, password + store.get('randomId'));
-                const hash = poseidonHashJS(intermediateHash);
-                return [serializePoseidon(hash), v, prove(intermediateHash, hash)];
+                const parsedTag = parseTag(k);
+                const hash = poseidonHashJS(parsedTag);
+                return [serializePoseidon(hash), v, prove(parsedTag, hash)];
             })
         ), to);
         event.reply('reEncrypt', { ok: true });
@@ -85,12 +81,12 @@ ipcMain.on('reEncrypt', async (event, data: Record<string, unknown>, password: s
     }
 });
 
-ipcMain.on('getData', async (event, tags: string[], password: string) => {
+ipcMain.on('getData', async (event, tags: string[]) => {
     try {
         const map: Record<string, string> = {};
         const result = await contract.evaluateTransaction('getData', JSON.stringify(
             tags.map((tag) => {
-                const hash = serializePoseidon(poseidonHashJS(hashTag(tag, password + store.get('randomId'))));
+                const hash = serializePoseidon(poseidonHashJS(parseTag(tag)));
                 map[hash] = tag;
                 return hash;
             })
@@ -102,13 +98,13 @@ ipcMain.on('getData', async (event, tags: string[], password: string) => {
     }
 });
 
-ipcMain.on('setData', async (event, data: Record<string, unknown>, password: string) => {
+ipcMain.on('setData', async (event, data: Record<string, unknown>) => {
     try {
         await contract.submitTransaction('setData', JSON.stringify(
             Object.entries(data).map(([k, v]) => {
-                const intermediateHash = hashTag(k, password + store.get('randomId'));
-                const hash = poseidonHashJS(intermediateHash);
-                return [serializePoseidon(hash), v, prove(intermediateHash, hash)];
+                const parsedTag = parseTag(k);
+                const hash = poseidonHashJS(parsedTag);
+                return [serializePoseidon(hash), v, prove(parsedTag, hash)];
             })
         ));
         event.reply('setData', { ok: true });
@@ -117,13 +113,13 @@ ipcMain.on('setData', async (event, data: Record<string, unknown>, password: str
     }
 });
 
-ipcMain.on('delData', async (event, tags: string[], password: string) => {
+ipcMain.on('delData', async (event, tags: string[]) => {
     try {
         await contract.submitTransaction('delData', JSON.stringify(
             tags.map((tag) => {
-                const intermediateHash = hashTag(tag, password + store.get('randomId'));
-                const hash = poseidonHashJS(intermediateHash);
-                return [serializePoseidon(hash), prove(intermediateHash, hash)];
+                const parsedTag = parseTag(tag);
+                const hash = poseidonHashJS(parsedTag);
+                return [serializePoseidon(hash), prove(parsedTag, hash)];
             })
         ));
         event.reply('delData', { ok: true });
