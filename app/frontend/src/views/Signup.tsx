@@ -11,15 +11,16 @@ export const Signup: FC = () => {
     const classes = useStyles();
     const appInfo = useAppInfo();
     useEffect(() => {
-        void (async () => {
+        const timer = setInterval(async () => {
             const { loggedIn } = await (await fetch(`${import.meta.env.SNOWPACK_PUBLIC_APP_BACKEND}/status`, {
                 credentials: 'include',
             })).json();
             if (loggedIn) {
                 navigate('/dashboard');
             }
-        })();
-    }, [navigate]);
+        }, 2000);
+        return () => clearInterval(timer);
+    }, []);
     return (
         <div className={classes.root}>
             <Paper className={classes.container} elevation={10}>
@@ -40,7 +41,6 @@ export const Signup: FC = () => {
                                 id: 'YouChat',
                                 pk: appInfo.pk,
                                 callback: appInfo.callback,
-                                redirect: `${import.meta.env.SNOWPACK_PUBLIC_APP_FRONTEND}/dashboard`,
                                 data: appInfo.data,
                             }))}`
                         }>

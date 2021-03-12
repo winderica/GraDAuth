@@ -1,7 +1,7 @@
 import { Button, Card, CardActions, CardContent, CardHeader, Typography } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import React, { ChangeEvent, FC, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 import { api } from '../api';
 import { Checkbox } from '../components/Checkbox';
@@ -21,7 +21,6 @@ interface AuthGettingRequest {
     id: string;
     pk: string;
     callback: string;
-    redirect: string;
     data: string[];
 }
 
@@ -30,7 +29,6 @@ interface AuthSettingRequest {
     id: string;
     pk: string;
     callback: string;
-    redirect: string;
     data: Record<string, string>;
 }
 
@@ -50,7 +48,6 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
         );
         await asyncAction(async () => {
             await api.reEncrypt(data, request.callback);
-            open(request.redirect, '_blank');
         }, '提交重加密密钥');
     };
 
@@ -82,13 +79,15 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
 });
 
 const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) => {
+    const navigate = useNavigate();
     const { userDataStore, keyStore } = useStores();
     useUserData();
     const alice = useAlice();
     const classes = useStyles();
-    const deltaDataStore = new UserDataStore(
-        Object.fromEntries(Object.entries(request.data).map(([k, v]) => [k, { value: v, tag: '' }]))
-    );
+    const deltaDataStore = new UserDataStore();
+    useEffect(() => {
+        Object.entries(request.data).map(([k, v]) => deltaDataStore.set(k, v));
+    }, [request]);
     const handleAuth = async () => {
         for (const { key, value } of deltaDataStore.dataArray) {
             await userDataStore.set(key, value);
@@ -97,7 +96,7 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
         await asyncAction(async () => {
             await api.setData(encrypted);
             await keyStore.set(dataKey);
-            open(request.redirect, '_blank');
+            navigate('/data');
         }, '提交加密数据');
     };
 
@@ -105,7 +104,7 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
         <Card className={classes.container}>
             <CardHeader title='授权更新信息' />
             <CardContent>
-                <Typography gutterBottom>应用{request.id}想要更新您的以下信息，请为各项数据分配对应的标签：</Typography>
+                <Typography gutterBottom>应用{request.id}想要更新您的以下信息：</Typography>
                 <Table title='更新信息' dataStore={deltaDataStore} />
             </CardContent>
             <CardActions className={classes.buttonContainer}>

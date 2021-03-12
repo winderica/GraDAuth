@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron';
+import { app, BrowserWindow } from 'electron';
 
 import './ipc';
 
@@ -32,10 +32,6 @@ if (!app.requestSingleInstanceLock()) {
                 nodeIntegrationInWorker: true,
                 contextIsolation: false,
             },
-        });
-        mainWindow.webContents.on('new-window', (event, url) => {
-            event.preventDefault();
-            void shell.openExternal(url);
         });
         if (app.isPackaged) {
             void mainWindow.loadFile('renderer/index.html');

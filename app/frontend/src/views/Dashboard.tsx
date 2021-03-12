@@ -59,7 +59,6 @@ export const Dashboard: FC = () => {
                                 id: 'YouChat',
                                 pk: appInfo.pk,
                                 callback: appInfo.callback,
-                                redirect: `${import.meta.env.SNOWPACK_PUBLIC_APP_FRONTEND}/dashboard`,
                                 data: {
                                     YouChatID: data.id,
                                 },
