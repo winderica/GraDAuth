@@ -24,6 +24,9 @@ app.use(session({
     secret: 'F4k3P@ssw0rd',
     resave: false,
     saveUninitialized: true,
+    cookie: {
+        sameSite: 'lax',
+    },
 }));
 
 const pre = new PRE();
@@ -60,22 +63,33 @@ void (async () => {
         res.json({ loggedIn: !!fakeDB[req.session.token] });
     });
 
-    app.post('/decrypt/:token', (req, res) => {
-        try {
-            const data: { data: string; key: { cb0: string; cb1: string }; iv: string }[] = req.body;
-            const { name, avatar, bio, city, id } = data
-                .map(({ data, key, iv }) => JSON.parse(bob.reDecrypt(data, key, iv)) as Record<string, string>)
-                .reduce((i, { key, value }) => ({ ...i, [key]: value }), { id: v4() });
-            if (name && avatar && bio && city && id && fakeTokenMap[req.params.token]) {
-                fakeDB[fakeTokenMap[req.params.token]] = { name, avatar, bio, city, id };
-                res.sendStatus(200);
-            } else {
-                res.sendStatus(400);
+    app.post<{ token: string }, never, { data: string; key: Record<'cb0' | 'cb1', string>; iv: string }[]>(
+        '/decrypt/:token',
+        (req, res) => {
+            try {
+                const decrypted: Record<string, string> = {};
+                for (const { data, key, iv } of req.body) {
+                    const kv: { key: string; value: string } = JSON.parse(bob.reDecrypt(data, key, iv));
+                    decrypted[kv.key] = kv.value;
+                }
+                if (fakeTokenMap[req.params.token]) {
+                    fakeDB[fakeTokenMap[req.params.token]] = {
+                        name: decrypted.name || '',
+                        avatar: decrypted.avatar || '',
+                        bio: decrypted.bio || '',
+                        city: decrypted.city || '',
+                        id: v4(),
+                    };
+                    delete fakeTokenMap[req.params.token];
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } catch {
+                res.sendStatus(500);
             }
-        } catch {
-            res.sendStatus(500);
         }
-    });
+    );
 
     app.listen(PORT, '0.0.0.0');
 })();
