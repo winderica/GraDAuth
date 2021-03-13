@@ -1,6 +1,5 @@
-import { lookup } from 'dns';
+import { promises } from 'dns';
 import { hostname } from 'os';
-import { promisify } from 'util';
 
 import cors from 'cors';
 import express, { json, urlencoded } from 'express';
@@ -35,7 +34,7 @@ const fakeDB: Record<string, Record<string, string>> = {};
 const fakeTokenMap: Record<string, string> = {};
 
 void (async () => {
-    const { address } = await promisify(lookup)(hostname());
+    const { address } = await promises.lookup(hostname());
     await pre.init();
     const contract = await getContract('app');
     const result = await contract.evaluateTransaction('getGH');
