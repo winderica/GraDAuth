@@ -13,7 +13,6 @@ module.exports = {
     plugins: [
         '@snowpack/plugin-react-refresh',
         '@snowpack/plugin-typescript',
-        '@snowpack/plugin-dotenv',
     ],
     devOptions: {
         open: 'none',

@@ -29,7 +29,7 @@ export const Dashboard: FC = () => {
     const appInfo = useAppInfo();
     useEffect(() => {
         void (async () => {
-            const { data } = await (await fetch(`${import.meta.env.SNOWPACK_PUBLIC_APP_BACKEND}/data`, {
+            const { data } = await (await fetch(`http://${location.hostname}:4001/data`, {
                 credentials: 'include',
             })).json();
             data ? setData(data) : navigate('/');

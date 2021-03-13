@@ -12,7 +12,7 @@ export const Signup: FC = () => {
     const appInfo = useAppInfo();
     useEffect(() => {
         const timer = setInterval(async () => {
-            const { loggedIn } = await (await fetch(`${import.meta.env.SNOWPACK_PUBLIC_APP_BACKEND}/status`, {
+            const { loggedIn } = await (await fetch(`http://${location.hostname}:4001/status`, {
                 credentials: 'include',
             })).json();
             if (loggedIn) {
