@@ -12,7 +12,7 @@ import {
 import React, { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAppInfo } from '../providers/appInfo';
+import { useAppInfo } from '../hooks/useAppInfo';
 import { useStyles } from '../styles/dashboard';
 
 interface Data {
@@ -36,7 +36,7 @@ export const Dashboard: FC = () => {
         })();
     }, [navigate]);
     const classes = useStyles();
-    return data ? (
+    return appInfo && data ? (
         <div className={classes.root}>
             <Card elevation={10}>
                 <CardHeader title='Welcome' />

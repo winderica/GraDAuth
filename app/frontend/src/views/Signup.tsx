@@ -3,7 +3,7 @@ import React, { FC, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import YouChat from '../assets/YouChat.png';
-import { useAppInfo } from '../providers/appInfo';
+import { useAppInfo } from '../hooks/useAppInfo';
 import { useStyles } from '../styles/signup';
 
 export const Signup: FC = () => {
@@ -21,7 +21,7 @@ export const Signup: FC = () => {
         }, 2000);
         return () => clearInterval(timer);
     }, []);
-    return (
+    return appInfo ? (
         <div className={classes.root}>
             <Paper className={classes.container} elevation={10}>
                 <div className={classes.header}>
@@ -51,5 +51,5 @@ export const Signup: FC = () => {
                 </Card>
             </Paper>
         </div>
-    );
+    ) : null;
 };
