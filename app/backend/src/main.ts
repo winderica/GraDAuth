@@ -2,8 +2,7 @@ import { promises } from 'dns';
 import { hostname } from 'os';
 
 import cors from 'cors';
-import express, { json, urlencoded } from 'express';
-import session from 'express-session';
+import express, { json, urlencoded, Request } from 'express';
 import { v4 } from 'uuid';
 
 import { Bob } from './utils/bob';
@@ -19,19 +18,13 @@ app.use(cors({
 }));
 app.use(json());
 app.use(urlencoded({ extended: true }));
-app.use(session({
-    secret: 'F4k3P@ssw0rd',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        sameSite: 'lax',
-    },
-}));
 
 const pre = new PRE();
 
 const fakeDB: Record<string, Record<string, string>> = {};
 const fakeTokenMap: Record<string, string> = {};
+
+const getToken = (req: Request) => req.header('cookie')?.match(/(?<=token=)(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})/g)?.[0];
 
 void (async () => {
     const { address } = await promises.lookup(hostname());
@@ -42,12 +35,10 @@ void (async () => {
     const bob = new Bob(pre, g, h);
 
     app.get('/appInfo', (req, res) => {
-        if (!req.session.token) {
-            req.session.token = v4();
-        }
+        const accessToken = getToken(req) || v4();
         const decryptToken = v4();
-        fakeTokenMap[decryptToken] = req.session.token;
-        res.json({
+        fakeTokenMap[decryptToken] = accessToken;
+        res.cookie('token', accessToken).json({
             pk: bob.pk,
             data: ['name', 'avatar', 'city', 'bio'],
             callback: `http://${address}:${PORT}/decrypt/${decryptToken}`,
@@ -55,11 +46,11 @@ void (async () => {
     });
 
     app.get('/data', (req, res) => {
-        res.json({ data: fakeDB[req.session.token] });
+        res.json({ data: fakeDB[getToken(req)!] });
     });
 
     app.get('/status', (req, res) => {
-        res.json({ loggedIn: !!fakeDB[req.session.token] });
+        res.json({ loggedIn: !!fakeDB[getToken(req)!] });
     });
 
     app.post<{ token: string }, never, { data: string; key: Record<'cb0' | 'cb1', string>; iv: string }[]>(
