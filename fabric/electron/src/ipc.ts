@@ -12,7 +12,6 @@ import { getContract } from './utils/wallet';
 const store = new Store<{
     connection: Record<string, unknown>;
     identity: Identity;
-    randomId: string;
 }>();
 let contract: Contract;
 
@@ -47,7 +46,10 @@ ipcMain.on('init', async (event) => {
         }
         try {
             contract = await getContract(store.get('connection'), store.get('identity'));
-        } catch {
+        } catch (e) {
+            store.delete('identity');
+            store.delete('connection');
+            console.log(e);
         }
     }
     event.reply('init', { ok: true });
