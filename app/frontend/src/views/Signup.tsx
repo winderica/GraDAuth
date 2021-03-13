@@ -3,7 +3,7 @@ import React, { FC, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import YouChat from '../assets/YouChat.png';
-import { useAppInfo } from '../providers/appInfo';
+import { useAppInfo } from '../hooks/useAppInfo';
 import { useStyles } from '../styles/signup';
 
 export const Signup: FC = () => {
@@ -11,16 +11,17 @@ export const Signup: FC = () => {
     const classes = useStyles();
     const appInfo = useAppInfo();
     useEffect(() => {
-        void (async () => {
-            const { loggedIn } = await (await fetch(`${import.meta.env.SNOWPACK_PUBLIC_APP_BACKEND}/status`, {
+        const timer = setInterval(async () => {
+            const { loggedIn } = await (await fetch(`http://${location.hostname}:4001/status`, {
                 credentials: 'include',
             })).json();
             if (loggedIn) {
                 navigate('/dashboard');
             }
-        })();
-    }, [navigate]);
-    return (
+        }, 2000);
+        return () => clearInterval(timer);
+    }, []);
+    return appInfo ? (
         <div className={classes.root}>
             <Paper className={classes.container} elevation={10}>
                 <div className={classes.header}>
@@ -40,7 +41,6 @@ export const Signup: FC = () => {
                                 id: 'YouChat',
                                 pk: appInfo.pk,
                                 callback: appInfo.callback,
-                                redirect: `${import.meta.env.SNOWPACK_PUBLIC_APP_FRONTEND}/dashboard`,
                                 data: appInfo.data,
                             }))}`
                         }>
@@ -51,5 +51,5 @@ export const Signup: FC = () => {
                 </Card>
             </Paper>
         </div>
-    );
+    ) : null;
 };

@@ -39,47 +39,6 @@ const source = `(module
             (mul (load.local $fullRound) (load.param $isFullRound))
             (mul (load.local $partRound) (sub (scalar 1)  (load.param $isFullRound)))))
 
-    # initializer for Merkle root computation
-    (function $initMerkleHash
-        (result vector 12)
-        (param $p vector 2) (param $v vector 2)
-        (vector
-            (load.param $p) (load.param $v) (scalar 0) (scalar 0)
-            (load.param $v) (load.param $p) (scalar 0) (scalar 0)))
-
-    # transition function for Merkle root computation
-    (function $merkleTransition
-        (result vector 12)
-        (param $r vector 12) (param $k vector 14)
-        (local $h1 vector 6) (local $h2 vector 6) (local $h vector 2)
-        (store.local $h1
-            (call $poseidonRound
-                (slice (load.param $r) 0 5) (slice (load.param $k) 8 13) (get (load.param $k) 7)))
-        (store.local $h2
-            (call $poseidonRound
-                (slice (load.param $r) 6 11) (slice (load.param $k) 8 13) (get (load.param $k) 7)))
-        (store.local $h
-            (add
-                (mul (slice (load.param $r) 6 7) (get (load.param $k) 4))
-                (mul
-                    (slice (load.param $r) 0 1)
-                    (sub (scalar 1) (get (load.param $k) 4)))))
-        (add
-            (mul
-                (call $initMerkleHash (slice (load.param $k) 0 1) (slice (load.param $k) 1 2))
-                (get (load.param $k) 5))
-            (add
-                (mul
-                    (call $initMerkleHash (load.local $h) (slice (load.param $k) 2 3))
-                    (mul
-                        (sub (scalar 1) (get (load.param $k) 5))
-                        (get (load.param $k) 6)))
-                (mul
-                    (vector (load.local $h1) (load.local $h2))
-                    (mul
-                        (sub (scalar 1) (get (load.param $k) 5))
-                        (sub (scalar 1) (get (load.param $k) 6)))))))
-
     # Poseidon hash function
     (export ComputePoseidonHash
         (registers 6) (constraints 6) (steps 64)
@@ -122,83 +81,6 @@ const source = `(module
                     (mul
                         (load.local 0)
                         (sub (scalar 1) (get (load.static 0) 4))))))
-    )
-
-    # Merkle proof verification
-    (export ComputeMerkleRoot
-        (registers 12) (constraints 12) (steps 64)
-        (static
-            (input secret (shift -1))                           # 0: leaf  _1
-            (input secret (peerof 0) (shift -1))                # 1: leaf  _2
-            (input secret (childof 0) (steps 64) (shift -1))    # 2: nodes _1
-            (input secret (childof 0) (steps 64) (shift -1))    # 3: nodes _2
-            (input public (childof 0) (steps 64) (shift -1))    # 4: index bits
-            (mask (input 0))                                    # 5: leaf mask
-            (mask (input 2))                                    # 6: node mask
-            (cycle 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 0)
-            (cycle (prng sha256 0x486164657331 64))
-            (cycle (prng sha256 0x486164657332 64))
-            (cycle (prng sha256 0x486164657333 64))
-            (cycle (prng sha256 0x486164657334 64))
-            (cycle (prng sha256 0x486164657335 64))
-            (cycle (prng sha256 0x486164657336 64)))
-        (init
-            (call $initMerkleHash (slice (load.static 0) 0 1) (slice (load.static 0) 2 3)))
-        (transition
-            (call $merkleTransition (load.trace 0) (load.static 0)))
-        (evaluation
-            (sub
-                (load.trace 1)
-                (call $merkleTransition (load.trace 0) (load.static 0))))
-    )
-
-    # Merkle tree update verification
-    (export ComputeMerkleUpdate
-        (registers 24) (constraints 25) (steps 64)
-        (static
-            (input secret (shift -1))                           # 0: oldLeaf _1
-            (input secret (peerof 0) (shift -1))                # 1: oldLeaf _2
-            (input secret (peerof 0) (shift -1))                # 2: newLeaf _1
-            (input secret (peerof 0) (shift -1))                # 3: newLeaf _2
-            (input secret (childof 0) (steps 64) (shift -1))    # 4: nodes   _1
-            (input secret (childof 0) (steps 64) (shift -1))    # 5: nodes   _2
-            (input secret (childof 0) (steps 64) (shift -1))    # 6: index bits
-            (mask (input 0))                                    # 7: leaf mask
-            (mask (input 4))                                    # 8: node mask
-            (cycle 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 0)
-            (cycle (prng sha256 0x486164657331 64))
-            (cycle (prng sha256 0x486164657332 64))
-            (cycle (prng sha256 0x486164657333 64))
-            (cycle (prng sha256 0x486164657334 64))
-            (cycle (prng sha256 0x486164657335 64))
-            (cycle (prng sha256 0x486164657336 64)))
-        (init
-            (vector
-                (call $initMerkleHash (slice (load.static 0) 0 1) (slice (load.static 0) 4 5))
-                (call $initMerkleHash (slice (load.static 0) 2 3) (slice (load.static 0) 4 5))))
-        (transition
-            (vector
-                (call $merkleTransition
-                    (slice (load.trace 0) 0 11)
-                    (vector (slice (load.static 0) 0 1) (slice (load.static 0) 4 15)))
-                (call $merkleTransition
-                    (slice (load.trace 0) 12 23)
-                    (vector (slice (load.static 0) 2 3) (slice (load.static 0) 4 15)))))
-        (evaluation
-            (local $tr vector 24)
-            (store.local $tr
-                (vector
-                    (call $merkleTransition
-                        (slice (load.trace 0) 0 11)
-                        (vector (slice (load.static 0) 0 1) (slice (load.static 0) 4 15)))
-                    (call $merkleTransition
-                        (slice (load.trace 0) 12 23)
-                        (vector (slice (load.static 0) 2 3) (slice (load.static 0) 4 15)))))
-            (vector
-                (sub (load.trace 1) (load.local $tr))
-                (sub                                            # index bit is binary
-                    (exp (get (load.static 0) 6) (scalar 2))
-                    (get (load.static 0) 6))))
     )
 )`;
 

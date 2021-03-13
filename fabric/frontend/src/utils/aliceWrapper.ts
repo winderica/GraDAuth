@@ -1,16 +1,16 @@
-import { TaggedEncrypted, TaggedPreKeyPair, TaggedUserDataArray, UserDataArray } from '../constants/types';
+import { TaggedEncrypted, TaggedPreKeyPair, UserData, UserDataArray } from '../constants/types';
 
 import { Alice } from './alice';
 
 export const encrypt = async (
     aliceInstance: Alice,
-    data: TaggedUserDataArray,
-    dataKey = getDataKey(aliceInstance, data.map(([tag]) => tag))
+    data: UserDataArray,
+    dataKey = getDataKey(aliceInstance, data.map(({ tag }) => tag))
 ) => {
     const encrypted: TaggedEncrypted = {};
-    await Promise.all(data.map(async ([tag, kv]) => {
-        encrypted[tag] = await aliceInstance.encrypt(JSON.stringify(kv), dataKey[tag].pk);
-    }));
+    for (const { key, tag, value } of data) {
+        encrypted[tag] = await aliceInstance.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
+    }
     return { encrypted, dataKey };
 };
 
@@ -19,13 +19,10 @@ export const getDataKey = (aliceInstance: Alice, tags: string[]) => {
 };
 
 export const decrypt = async (aliceInstance: Alice, data: TaggedEncrypted, dataKey: TaggedPreKeyPair) => {
-    const decrypted: UserDataArray = [];
-    await Promise.all(Object.entries(data).map(async ([tag, encrypted]) => {
-        Object
-            .entries<string>(JSON.parse(await aliceInstance.decrypt(encrypted, dataKey[tag].sk)))
-            .forEach(([key, value]) => {
-                decrypted.push({ key, value, tag });
-            });
-    }));
+    const decrypted: UserData = {};
+    for (const [tag, encrypted] of Object.entries(data)) {
+        const { key, value } = JSON.parse(await aliceInstance.decrypt(encrypted, dataKey[tag].sk));
+        decrypted[key as string] = { tag, value };
+    }
     return decrypted;
 };

@@ -1,7 +1,7 @@
 import { Button, Card, CardActions, CardContent, CardHeader, Typography } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import React, { ChangeEvent, FC, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 import { api } from '../api';
 import { Checkbox } from '../components/Checkbox';
@@ -14,14 +14,13 @@ import { useUserData } from '../hooks/useUserData';
 import { UserDataStore } from '../stores';
 import { useStyles } from '../styles/auth';
 import { encrypt } from '../utils/aliceWrapper';
-import { apiWrapper } from '../utils/apiWrapper';
+import { asyncAction } from '../utils/asyncAction';
 
 interface AuthGettingRequest {
     type: 'get';
     id: string;
     pk: string;
     callback: string;
-    redirect: string;
     data: string[];
 }
 
@@ -30,28 +29,26 @@ interface AuthSettingRequest {
     id: string;
     pk: string;
     callback: string;
-    redirect: string;
     data: Record<string, string>;
 }
 
 type AuthRequest = AuthGettingRequest | AuthSettingRequest;
 
 const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) => {
-    const { identityStore, keyStore, userDataStore } = useStores();
+    const { keyStore, userDataStore } = useStores();
     useUserData();
     const alice = useAlice();
     const classes = useStyles();
     const [checked, setChecked] = useState<Checked>({});
     const handleAuth = async () => {
         const data = Object.fromEntries(
-            Object.entries(userDataStore.dataGroupedByTag)
-                .filter(([, data]) => Object.keys(data).filter((key) => checked[key]).length)
-                .map(([tag]) => [tag, alice.reKey(request.pk, keyStore.dataKey[tag].sk)])
+            userDataStore.dataArray
+                .filter(({ key }) => checked[key])
+                .map(({ tag }) => [tag, alice.reKey(request.pk, keyStore.dataKey[tag].sk)])
         );
-        await apiWrapper(async () => {
-            await api.reEncrypt(data, identityStore.password, request.callback);
-            open(request.redirect, '_blank');
-        }, '正在提交重加密密钥', '成功提交重加密密钥');
+        await asyncAction(async () => {
+            await api.reEncrypt(data, request.callback);
+        }, '提交重加密密钥');
     };
 
     const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
@@ -73,10 +70,6 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
                         key={key}
                     />
                 ))}
-                <Typography>数据对应的标签将自动勾选</Typography>
-                {Object.entries(userDataStore.dataGroupedByTag).map(([tag, data]) => (
-                    <Checkbox checked={!!Object.keys(data).filter((key) => checked[key]).length} name={tag} key={tag} />
-                ))}
             </CardContent>
             <CardActions className={classes.buttonContainer}>
                 <Button onClick={handleAuth} variant='contained' color='primary'>授权</Button>
@@ -86,28 +79,32 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
 });
 
 const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) => {
-    const { userDataStore, identityStore, keyStore } = useStores();
+    const navigate = useNavigate();
+    const { userDataStore, keyStore } = useStores();
     useUserData();
     const alice = useAlice();
     const classes = useStyles();
-    const deltaDataStore = new UserDataStore(
-        Object.fromEntries(Object.entries(request.data).map(([k, v]) => [k, { value: v, tag: '' }]))
-    );
+    const deltaDataStore = new UserDataStore();
+    useEffect(() => {
+        Object.entries(request.data).map(([k, v]) => deltaDataStore.set(k, v));
+    }, [request]);
     const handleAuth = async () => {
-        deltaDataStore.dataArray.forEach(({ key, value, tag }) => userDataStore.set(key, value, tag));
-        const { dataKey, encrypted } = await encrypt(alice, userDataStore.dataArrayGroupedByTag);
-        await apiWrapper(async () => {
-            await api.setData(encrypted, identityStore.password);
+        for (const { key, value } of deltaDataStore.dataArray) {
+            await userDataStore.set(key, value);
+        }
+        const { dataKey, encrypted } = await encrypt(alice, userDataStore.dataArray);
+        await asyncAction(async () => {
+            await api.setData(encrypted);
             await keyStore.set(dataKey);
-            open(request.redirect, '_blank');
-        }, '正在提交加密数据', '成功加密并提交');
+            navigate('/data');
+        }, '提交加密数据');
     };
 
     return (
         <Card className={classes.container}>
             <CardHeader title='授权更新信息' />
             <CardContent>
-                <Typography gutterBottom>应用{request.id}想要更新您的以下信息，请为各项数据分配对应的标签：</Typography>
+                <Typography gutterBottom>应用{request.id}想要更新您的以下信息：</Typography>
                 <Table title='更新信息' dataStore={deltaDataStore} />
             </CardContent>
             <CardActions className={classes.buttonContainer}>
@@ -118,7 +115,7 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
 });
 
 export const Auth: FC = observer(() => {
-    const { identityStore, notificationStore } = useStores();
+    const { userDataStore, notificationStore } = useStores();
     const request = useUrlParams<AuthRequest>('request');
 
     useEffect(() => {
@@ -127,7 +124,7 @@ export const Auth: FC = observer(() => {
         }
     }, []);
 
-    if (!identityStore.password) {
+    if (!userDataStore.password) {
         return <Navigate to='/' />;
     }
 

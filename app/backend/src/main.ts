@@ -1,10 +1,8 @@
-import { lookup } from 'dns';
+import { promises } from 'dns';
 import { hostname } from 'os';
-import { promisify } from 'util';
 
 import cors from 'cors';
-import express, { json, urlencoded } from 'express';
-import session from 'express-session';
+import express, { json, urlencoded, Request } from 'express';
 import { v4 } from 'uuid';
 
 import { Bob } from './utils/bob';
@@ -20,19 +18,16 @@ app.use(cors({
 }));
 app.use(json());
 app.use(urlencoded({ extended: true }));
-app.use(session({
-    secret: 'F4k3P@ssw0rd',
-    resave: false,
-    saveUninitialized: true,
-}));
 
 const pre = new PRE();
 
 const fakeDB: Record<string, Record<string, string>> = {};
 const fakeTokenMap: Record<string, string> = {};
 
+const getToken = (req: Request) => req.header('cookie')?.match(/(?<=token=)(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})/g)?.[0];
+
 void (async () => {
-    const { address } = await promisify(lookup)(hostname());
+    const { address } = await promises.lookup(hostname());
     await pre.init();
     const contract = await getContract('app');
     const result = await contract.evaluateTransaction('getGH');
@@ -40,12 +35,10 @@ void (async () => {
     const bob = new Bob(pre, g, h);
 
     app.get('/appInfo', (req, res) => {
-        if (!req.session.token) {
-            req.session.token = v4();
-        }
+        const accessToken = getToken(req) || v4();
         const decryptToken = v4();
-        fakeTokenMap[decryptToken] = req.session.token;
-        res.json({
+        fakeTokenMap[decryptToken] = accessToken;
+        res.cookie('token', accessToken).json({
             pk: bob.pk,
             data: ['name', 'avatar', 'city', 'bio'],
             callback: `http://${address}:${PORT}/decrypt/${decryptToken}`,
@@ -53,29 +46,40 @@ void (async () => {
     });
 
     app.get('/data', (req, res) => {
-        res.json({ data: fakeDB[req.session.token] });
+        res.json({ data: fakeDB[getToken(req)!] });
     });
 
     app.get('/status', (req, res) => {
-        res.json({ loggedIn: !!fakeDB[req.session.token] });
+        res.json({ loggedIn: !!fakeDB[getToken(req)!] });
     });
 
-    app.post('/decrypt/:token', (req, res) => {
-        try {
-            const data: { data: string; key: { cb0: string; cb1: string }; iv: string }[] = req.body;
-            const { name, avatar, bio, city, id } = data
-                .map(({ data, key, iv }) => JSON.parse(bob.reDecrypt(data, key, iv)) as Record<string, string>)
-                .reduce((i, j) => ({ ...i, ...j }), { id: v4() });
-            if (name && avatar && bio && city && id && fakeTokenMap[req.params.token]) {
-                fakeDB[fakeTokenMap[req.params.token]] = { name, avatar, bio, city, id };
-                res.sendStatus(200);
-            } else {
-                res.sendStatus(400);
+    app.post<{ token: string }, never, { data: string; key: Record<'cb0' | 'cb1', string>; iv: string }[]>(
+        '/decrypt/:token',
+        (req, res) => {
+            try {
+                const decrypted: Record<string, string> = {};
+                for (const { data, key, iv } of req.body) {
+                    const kv: { key: string; value: string } = JSON.parse(bob.reDecrypt(data, key, iv));
+                    decrypted[kv.key] = kv.value;
+                }
+                if (fakeTokenMap[req.params.token]) {
+                    fakeDB[fakeTokenMap[req.params.token]] = {
+                        name: decrypted.name || '',
+                        avatar: decrypted.avatar || '',
+                        bio: decrypted.bio || '',
+                        city: decrypted.city || '',
+                        id: v4(),
+                    };
+                    delete fakeTokenMap[req.params.token];
+                    res.sendStatus(200);
+                } else {
+                    res.sendStatus(400);
+                }
+            } catch {
+                res.sendStatus(500);
             }
-        } catch {
-            res.sendStatus(500);
         }
-    });
+    );
 
     app.listen(PORT, '0.0.0.0');
 })();

@@ -1,47 +1,51 @@
+import * as idb from 'idb-keyval';
 import { makeAutoObservable } from 'mobx';
 
-import { TaggedUserData, UserData } from '../constants/types';
+import { UserData } from '../constants/types';
+import { randomId } from '../utils/randomId';
+import { sha256 } from '../utils/sha256';
 
 export class UserDataStore {
+    id!: string;
+
     data: UserData;
 
-    initialized = false;
+    password = sessionStorage.getItem('password') || '';
 
     constructor(data: UserData = {}) {
         this.data = data;
         makeAutoObservable(this);
     }
 
+    async load() {
+        const id = await idb.get<string>('id');
+        if (id) {
+            this.id = id;
+        } else {
+            this.id = randomId(256);
+            await idb.set('id', this.id);
+        }
+    }
+
     setAll(data: UserData) {
         this.data = data;
     }
 
-    set(key: string, value: string, tag: string) {
-        this.data[key] = { value, tag };
+    async set(key: string, value: string) {
+        this.data[key] = { value, tag: await sha256(`${this.id}.${this.password}.${key}.${value}`) };
     }
 
     del(name: string) {
         delete this.data[name];
     }
 
-    setInitialized(initialized = true) {
-        this.initialized = initialized;
+    setPassword(password: string) {
+        this.password = password;
+        sessionStorage.setItem('password', password);
     }
 
     get dataArray() {
         return Object.entries(this.data).map(([key, { value, tag }]) => ({ key, value, tag }));
-    }
-
-    get dataGroupedByTag() {
-        const res: TaggedUserData = {};
-        Object.entries(this.data).forEach(([key, { value, tag }]) => {
-            res[tag] ? res[tag][key] = value : res[tag] = { [key]: value };
-        });
-        return res;
-    }
-
-    get dataArrayGroupedByTag() {
-        return Object.entries(this.dataGroupedByTag);
     }
 
     get tags() {

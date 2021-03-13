@@ -7,10 +7,6 @@ export type UserData = Record<string, { value: string; tag: string }>;
 
 export type UserDataArray = { key: string; value: string; tag: string }[];
 
-export type TaggedUserData = Record<string, Record<string, string>>;
-
-export type TaggedUserDataArray = [string, Record<string, string>][];
-
 export interface PreKeyPair {
     pk: string;
     sk: string;

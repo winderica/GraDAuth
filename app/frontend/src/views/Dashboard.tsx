@@ -12,7 +12,7 @@ import {
 import React, { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAppInfo } from '../providers/appInfo';
+import { useAppInfo } from '../hooks/useAppInfo';
 import { useStyles } from '../styles/dashboard';
 
 interface Data {
@@ -29,14 +29,14 @@ export const Dashboard: FC = () => {
     const appInfo = useAppInfo();
     useEffect(() => {
         void (async () => {
-            const { data } = await (await fetch(`${import.meta.env.SNOWPACK_PUBLIC_APP_BACKEND}/data`, {
+            const { data } = await (await fetch(`http://${location.hostname}:4001/data`, {
                 credentials: 'include',
             })).json();
             data ? setData(data) : navigate('/');
         })();
     }, [navigate]);
     const classes = useStyles();
-    return data ? (
+    return appInfo && data ? (
         <div className={classes.root}>
             <Card elevation={10}>
                 <CardHeader title='Welcome' />
@@ -59,7 +59,6 @@ export const Dashboard: FC = () => {
                                 id: 'YouChat',
                                 pk: appInfo.pk,
                                 callback: appInfo.callback,
-                                redirect: `${import.meta.env.SNOWPACK_PUBLIC_APP_FRONTEND}/dashboard`,
                                 data: {
                                     YouChatID: data.id,
                                 },
