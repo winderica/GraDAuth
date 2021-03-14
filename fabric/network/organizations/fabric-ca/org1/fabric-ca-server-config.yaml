@@ -4,15 +4,15 @@ debug: false
 crlsizelimit: 512000
 tls:
   enabled: true
-  certfile:
+  certfile: /host/tls-cert.pem
   keyfile:
   clientauth:
     type: noclientcert
     certfiles:
 ca:
-  name: Org1CA
+  name: ca-org1
   keyfile:
-  certfile:
+  certfile: /host/ca-cert.pem
   chainfile:
 crl:
   expiry: 24h
@@ -86,12 +86,12 @@ signing:
         - key agreement
       expiry: 8760h
 csr:
-  cn: ca.org1.example.com
+  cn: Org1CA
   names:
     - C: US
       ST: "North Carolina"
       L: "Durham"
-      O: org1.example.com
+      O: Org1
       OU:
   hosts:
     - localhost

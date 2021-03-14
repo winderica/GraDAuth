@@ -13,19 +13,14 @@ function removeUnwantedImages() {
 }
 
 function createOrgs() {
-  if [ -d "organizations/peerOrganizations" ]; then
-    rm -Rf organizations/peerOrganizations && rm -Rf organizations/ordererOrganizations
+  if [ -d "organizations/orderer" ]; then
+    rm -Rf organizations/or*
   fi
   docker-compose -f "$COMPOSE_FILE_CA" up -d 2>&1
+  while [ ! -f "organizations/fabric-ca/org1/tls-cert.pem" ]; do
+    sleep 1
+  done
   . organizations/fabric-ca/registerEnroll.sh
-  while :
-    do
-      if [ ! -f "organizations/fabric-ca/org1/tls-cert.pem" ]; then
-        sleep 1
-      else
-        break
-      fi
-    done
   createOrg1
   createOrg2
   createOrderer
@@ -33,14 +28,14 @@ function createOrgs() {
 }
 
 function networkUp() {
-  if [ ! -d "organizations/peerOrganizations" ]; then
+  if [ ! -d "organizations/orderer" ]; then
     createOrgs
   fi
   docker-compose -f "${COMPOSE_FILE_BASE}" -f "${COMPOSE_FILE_COUCH}" up -d
 }
 
 function createChannel() {
-  if [ ! -d "organizations/peerOrganizations" ]; then
+  if [ ! -d "organizations/orderer" ]; then
     networkUp
   fi
   scripts/createChannel.sh "$CHANNEL_NAME"
@@ -55,11 +50,7 @@ function networkDown() {
   if [ "$MODE" != "restart" ]; then
     clearContainers
     removeUnwantedImages
-    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf system-genesis-block/*.block organizations/peerOrganizations organizations/ordererOrganizations'
-    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/org1/msp organizations/fabric-ca/org1/tls-cert.pem organizations/fabric-ca/org1/ca-cert.pem organizations/fabric-ca/org1/IssuerPublicKey organizations/fabric-ca/org1/IssuerRevocationPublicKey organizations/fabric-ca/org1/fabric-ca-server.db'
-    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/org2/msp organizations/fabric-ca/org2/tls-cert.pem organizations/fabric-ca/org2/ca-cert.pem organizations/fabric-ca/org2/IssuerPublicKey organizations/fabric-ca/org2/IssuerRevocationPublicKey organizations/fabric-ca/org2/fabric-ca-server.db'
-    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db'
-    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf channel-artifacts *.tar.gz'
+    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/**/*.pem channel-artifacts *.tar.gz system-genesis-block/*.block organizations/or*'
     rm -rf ../../*/*/wallet/*.id
     rm -rf ../../*/*/assets/connection*.json
   fi

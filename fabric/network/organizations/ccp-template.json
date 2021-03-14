@@ -26,7 +26,7 @@
         "peer0.org${ORG}.example.com": {
             "url": "grpcs://localhost:${P0PORT}",
             "tlsCACerts": {
-                "pem": "${PEERPEM}"
+                "pem": "${PEM}"
             },
             "grpcOptions": {
                 "ssl-target-name-override": "peer0.org${ORG}.example.com",
@@ -39,7 +39,7 @@
             "url": "https://localhost:${CAPORT}",
             "caName": "ca-org${ORG}",
             "tlsCACerts": {
-                "pem": ["${CAPEM}"]
+                "pem": ["${PEM}"]
             },
             "httpOptions": {
                 "verify": false

@@ -1,18 +1,18 @@
 version: 1.2.0
-port: 7054
+port: 9054
 debug: false
 crlsizelimit: 512000
 tls:
   enabled: true
-  certfile:
+  certfile: /host/tls-cert.pem
   keyfile:
   clientauth:
     type: noclientcert
     certfiles:
 ca:
-  name: OrdererCA
+  name: ca-orderer
   keyfile:
-  certfile:
+  certfile: /host/ca-cert.pem
   chainfile:
 crl:
   expiry: 24h
@@ -86,12 +86,12 @@ signing:
         - key agreement
       expiry: 8760h
 csr:
-  cn: ca.example.com
+  cn: OrdererCA
   names:
     - C: US
       ST: "New York"
       L: "New York"
-      O: example.com
+      O: Orderer
       OU:
   hosts:
     - localhost
