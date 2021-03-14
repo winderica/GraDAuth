@@ -46,10 +46,8 @@ ipcMain.on('init', async (event) => {
         }
         try {
             contract = await getContract(store.get('connection'), store.get('identity'));
-        } catch (e) {
-            store.delete('identity');
-            store.delete('connection');
-            console.log(e);
+        } catch {
+            store.clear();
         }
     }
     event.reply('init', { ok: true });
