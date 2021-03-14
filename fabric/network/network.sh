@@ -1,22 +1,13 @@
 #!/bin/bash
 
-export PATH=${PWD}/bin:$PATH
-export FABRIC_CFG_PATH=${PWD}/config
-
-function clearContainers() {
-  docker rm -f "$(docker ps -aq --filter label=service=hyperledger-fabric)" 2>/dev/null || true
-  docker rm -f "$(docker ps -aq --filter name='dev-peer*')" 2>/dev/null || true
-}
-
-function removeUnwantedImages() {
-  docker image rm -f "$(docker images -aq --filter reference='dev-peer*')" 2>/dev/null || true
-}
+export PATH=$PWD/bin:$PATH
+export FABRIC_CFG_PATH=$PWD/config
 
 function createOrgs() {
   if [ -d "organizations/orderer" ]; then
     rm -Rf organizations/or*
   fi
-  docker-compose -f "$COMPOSE_FILE_CA" up -d 2>&1
+  docker-compose -f "$COMPOSE_FILE_CA" up -d
   while [ ! -f "organizations/fabric-ca/org1/tls-cert.pem" ]; do
     sleep 1
   done
@@ -31,7 +22,7 @@ function networkUp() {
   if [ ! -d "organizations/orderer" ]; then
     createOrgs
   fi
-  docker-compose -f "${COMPOSE_FILE_BASE}" -f "${COMPOSE_FILE_COUCH}" up -d
+  docker-compose -f "$COMPOSE_FILE_BASE" -f "$COMPOSE_FILE_COUCH" up -d
 }
 
 function createChannel() {
@@ -48,11 +39,11 @@ function deployCC() {
 function networkDown() {
   docker-compose -f "$COMPOSE_FILE_BASE" -f "$COMPOSE_FILE_COUCH" -f "$COMPOSE_FILE_CA" down --volumes --remove-orphans
   if [ "$MODE" != "restart" ]; then
-    clearContainers
-    removeUnwantedImages
-    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/**/*.pem channel-artifacts *.tar.gz system-genesis-block/*.block organizations/or*'
-    rm -rf ../../*/*/wallet/*.id
-    rm -rf ../../*/*/assets/connection*.json
+    docker rm -f "$(docker ps -aq --filter label=service=hyperledger-fabric)" 2>/dev/null || true
+    docker rm -f "$(docker ps -aq --filter name='dev-peer*')" 2>/dev/null || true
+    docker image rm -f "$(docker images -aq --filter reference='dev-peer*')" 2>/dev/null || true
+    docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/**/*.pem organizations/or*'
+    rm -rf channel-artifacts ./*.tar.gz ../../*/*/wallet/*.id ../../*/*/assets/connection*.json
   fi
 }
 
@@ -92,15 +83,15 @@ while [[ $# -ge 1 ]]; do
   shift
 done
 
-if [ "${MODE}" == "up" ]; then
+if [ "$MODE" == "up" ]; then
   networkUp
-elif [ "${MODE}" == "createChannel" ]; then
+elif [ "$MODE" == "createChannel" ]; then
   createChannel
-elif [ "${MODE}" == "deployCC" ]; then
+elif [ "$MODE" == "deployCC" ]; then
   deployCC
-elif [ "${MODE}" == "down" ]; then
+elif [ "$MODE" == "down" ]; then
   networkDown
-elif [ "${MODE}" == "restart" ]; then
+elif [ "$MODE" == "restart" ]; then
   networkDown
   networkUp
 else

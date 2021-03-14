@@ -15,7 +15,7 @@ createAnchorPeerUpdate() {
     PORT=9051
   fi
 
-  jq '.channel_group.groups.Application.groups.'"$CORE_PEER_LOCALMSPID"'.values += {"AnchorPeers":{"mod_policy": "Admins","value":{"anchor_peers": [{"host": "'$HOST'","port": '$PORT'}]},"version": "0"}}' config.json > modified_config.json
+  jq '.channel_group.groups.Application.groups.'"$CORE_PEER_LOCALMSPID"'.values += {"AnchorPeers":{"mod_policy": "Admins","value":{"anchor_peers": [{"host": "'$HOST'","port": '$PORT'}]},"version": "0"}}' config.json >modified_config.json
 
   configtxlator proto_encode --input config.json --type common.Config >original_config.pb
   configtxlator proto_encode --input modified_config.json --type common.Config >modified_config.pb

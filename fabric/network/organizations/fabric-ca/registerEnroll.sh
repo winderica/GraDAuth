@@ -22,7 +22,7 @@ function createOrg1() {
     OrganizationalUnitIdentifier: admin
   OrdererOUIdentifier:
     Certificate: cacerts/localhost-7054-ca-org1.pem
-    OrganizationalUnitIdentifier: orderer' > "$FABRIC_CA_CLIENT_HOME/msp/config.yaml"
+    OrganizationalUnitIdentifier: orderer' >"$FABRIC_CA_CLIENT_HOME/msp/config.yaml"
 
   fabric-ca-client register --id.name peer0 --id.secret peer0pw --id.type peer
 
@@ -74,7 +74,7 @@ function createOrg2() {
     OrganizationalUnitIdentifier: admin
   OrdererOUIdentifier:
     Certificate: cacerts/localhost-8054-ca-org2.pem
-    OrganizationalUnitIdentifier: orderer' > "$FABRIC_CA_CLIENT_HOME/msp/config.yaml"
+    OrganizationalUnitIdentifier: orderer' >"$FABRIC_CA_CLIENT_HOME/msp/config.yaml"
 
   fabric-ca-client register --id.name peer0 --id.secret peer0pw --id.type peer
 
@@ -126,7 +126,7 @@ function createOrderer() {
     OrganizationalUnitIdentifier: admin
   OrdererOUIdentifier:
     Certificate: cacerts/localhost-9054-ca-orderer.pem
-    OrganizationalUnitIdentifier: orderer' > "$FABRIC_CA_CLIENT_HOME/msp/config.yaml"
+    OrganizationalUnitIdentifier: orderer' >"$FABRIC_CA_CLIENT_HOME/msp/config.yaml"
 
   fabric-ca-client register --id.name orderer --id.secret ordererpw --id.type orderer
 
