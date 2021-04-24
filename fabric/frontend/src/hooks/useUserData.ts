@@ -26,7 +26,7 @@ export const useUserData = () => {
             const decrypted: UserData = {};
             for (const [tag, encrypted] of Object.entries(data)) {
                 const { key, value } = JSON.parse(await alice.decrypt(encrypted, keyStore.dataKey[map[tag]].sk));
-                decrypted[key as string] = { tag, value };
+                decrypted[key as string] = { tag: map[tag], value };
             }
             userDataStore.setAll(decrypted);
         }, '获取数据');

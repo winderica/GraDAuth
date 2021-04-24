@@ -34,7 +34,6 @@ export class AES {
         return uint8ArrayToHex(this.#iv);
     }
 
-    // produce base64 encoded data
     async encrypt(
         plaintext: string,
         plaintextEncoding: 'hex' | 'utf-8' | 'base64' = 'utf-8',
