@@ -10,11 +10,12 @@ export const Notifier = () => {
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     useEffect(() => {
         autorun(() => {
-            const { notifications } = notificationStore;
-            notifications.forEach(({ key, options, message }) => {
-                if (displayed.includes(key)) return;
+            Object.entries(notificationStore.snackbars).forEach(([key, { options, message }]) => {
+                if (displayed.includes(key)) {
+                    return;
+                }
                 enqueueSnackbar(message, options);
-                setDisplayed((displayed) => [...displayed, key]);
+                setDisplayed((prevDisplayed) => [...prevDisplayed, key]);
                 notificationStore.removeSnackbar(key);
                 closeSnackbar(key);
             });
