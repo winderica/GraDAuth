@@ -41,7 +41,7 @@ function networkDown() {
   if [ "$MODE" != "restart" ]; then
     docker rm -f "$(docker ps -aq --filter label=service=hyperledger-fabric)" 2>/dev/null || true
     docker rm -f "$(docker ps -aq --filter name='dev-peer*')" 2>/dev/null || true
-    docker image rm -f "$(docker images -aq --filter reference='dev-peer*')" 2>/dev/null || true
+    docker images -aq --filter reference='dev-peer*' | xargs docker rmi -f
     docker run --rm -v "$(pwd):/data" busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/**/*.pem organizations/or*'
     rm -rf channel-artifacts ./*.tar.gz ../../*/*/wallet/*.id ../../*/*/assets/connection*.json
   fi
