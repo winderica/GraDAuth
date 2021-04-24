@@ -19,7 +19,7 @@ const listItems = [
 
 export const Frame: FC = observer(({ children }) => {
     const classes = useStyles();
-    const { keyStore, userDataStore, componentStateStore } = useStores();
+    const { keyStore, componentStateStore } = useStores();
     const [open, setOpen] = useState(false);
     const [initialized, setInitialized] = useState(false);
 
@@ -34,7 +34,6 @@ export const Frame: FC = observer(({ children }) => {
     useEffect(() => {
         void (async () => {
             await api.init();
-            await userDataStore.load();
             await keyStore.load();
             setInitialized(true);
         })();

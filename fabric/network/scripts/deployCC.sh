@@ -8,7 +8,7 @@ packageChaincode() {
   cd ../chaincode || exit
   yarn build
   cd - >/dev/null || exit
-  peer lifecycle chaincode package "$CHAINCODE_NAME".tar.gz --path "../chaincode/dist/" --lang node --label "$CHAINCODE_NAME"_"${VERSION}"
+  peer lifecycle chaincode package "$CHAINCODE_NAME".tar.gz --path "../chaincode/dist/" --lang node --label "$CHAINCODE_NAME"_"$VERSION"
 }
 
 installChaincode() {
@@ -19,24 +19,22 @@ installChaincode() {
 approveForMyOrg() {
   setGlobals "$1"
   PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | grep "$CHAINCODE_NAME"_"$VERSION" | awk '{print $3}' | sed 's/.$//')
-  peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile "$ORDERER_CA" --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" --version "${VERSION}" --init-required --package-id "${PACKAGE_ID}" --sequence "${VERSION}"
+  peer lifecycle chaincode approveformyorg -o localhost:7050 --tls "$CORE_PEER_TLS_ENABLED" --cafile "$ORDERER_CA" --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" --version "$VERSION" --init-required --package-id "$PACKAGE_ID" --sequence "$VERSION"
 }
 
 checkCommitReadiness() {
   setGlobals "$1"
-  peer lifecycle chaincode checkcommitreadiness --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" --version "${VERSION}" --sequence "${VERSION}" --init-required
+  peer lifecycle chaincode checkcommitreadiness --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" --version "$VERSION" --sequence "$VERSION" --init-required
 }
 
 commitChaincodeDefinition() {
   PEER_CONN_PARMS=""
   while [ "$#" -gt 0 ]; do
     setGlobals "$1"
-    PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses $CORE_PEER_ADDRESS"
-    TLSINFO=$(eval echo "--tlsRootCertFiles \$PEER0_ORG$1_CA")
-    PEER_CONN_PARMS="$PEER_CONN_PARMS $TLSINFO"
+    PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses $CORE_PEER_ADDRESS --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE"
     shift
   done
-  peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile "$ORDERER_CA" --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" $PEER_CONN_PARMS --version "${VERSION}" --sequence "${VERSION}" --init-required
+  peer lifecycle chaincode commit -o localhost:7050 --tls "$CORE_PEER_TLS_ENABLED" --cafile "$ORDERER_CA" --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" $PEER_CONN_PARMS --version "$VERSION" --sequence "$VERSION" --init-required
 }
 
 getVersion() {
@@ -53,12 +51,10 @@ chaincodeInvokeInit() {
   PEER_CONN_PARMS=""
   while [ "$#" -gt 0 ]; do
     setGlobals "$1"
-    PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses $CORE_PEER_ADDRESS"
-    TLSINFO=$(eval echo "--tlsRootCertFiles \$PEER0_ORG$1_CA")
-    PEER_CONN_PARMS="$PEER_CONN_PARMS $TLSINFO"
+    PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses $CORE_PEER_ADDRESS --tlsRootCertFiles $CORE_PEER_TLS_ROOTCERT_FILE"
     shift
   done
-  peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile "$ORDERER_CA" -C "$CHANNEL_NAME" -n "$CHAINCODE_NAME" $PEER_CONN_PARMS --isInit -c '{"function":"init","Args":["aaaa", "bbbb"]}'
+  peer chaincode invoke -o localhost:7050 --tls "$CORE_PEER_TLS_ENABLED" --cafile "$ORDERER_CA" -C "$CHANNEL_NAME" -n "$CHAINCODE_NAME" $PEER_CONN_PARMS --isInit -c '{"function":"init","Args":["aaaa", "bbbb"]}'
 }
 
 getVersion 1

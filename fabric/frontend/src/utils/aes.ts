@@ -1,14 +1,20 @@
-import { base64ToUint8Array, hexToUint8Array, uint8ArrayToBase64, uint8ArrayToHex } from './codec';
+import { fromUint8Array, hexToUint8Array, toUint8Array, uint8ArrayToHex } from './codec';
 
 export class AES {
-    readonly #key: PromiseLike<CryptoKey>;
+    readonly #key: CryptoKey;
 
     readonly #iv: Uint8Array;
 
     readonly #algorithm: string;
 
-    constructor(key: string, iv?: string, algorithm = 'AES-GCM') {
-        this.#key = crypto.subtle.importKey(
+    constructor(key: CryptoKey, iv?: Uint8Array, algorithm = 'AES-GCM') {
+        this.#key = key;
+        this.#iv = iv ?? crypto.getRandomValues(new Uint8Array(algorithm === 'AES-GCM' ? 12 : 16));
+        this.#algorithm = algorithm;
+    }
+
+    static convertKey(key: string, algorithm = 'AES-GCM') {
+        return crypto.subtle.importKey(
             'raw',
             hexToUint8Array(key),
             {
@@ -16,10 +22,12 @@ export class AES {
                 length: 256,
             },
             false,
-            ['encrypt', 'decrypt']
+            ['encrypt', 'decrypt'],
         );
-        this.#iv = iv ? hexToUint8Array(iv) : crypto.getRandomValues(new Uint8Array(algorithm === 'AES-GCM' ? 12 : 16));
-        this.#algorithm = algorithm;
+    }
+
+    static convertIV(iv: string) {
+        return hexToUint8Array(iv);
     }
 
     get iv() {
@@ -27,27 +35,37 @@ export class AES {
     }
 
     // produce base64 encoded data
-    async encrypt(plaintext: string) {
-        return uint8ArrayToBase64(new Uint8Array(
-            await crypto.subtle.encrypt(
-                {
-                    name: this.#algorithm,
-                    iv: this.#iv,
-                },
-                await this.#key,
-                new TextEncoder().encode(plaintext)
-            ))
-        );
-    }
-
-    async decrypt(encrypted: string) {
-        return new TextDecoder().decode(await crypto.subtle.decrypt(
+    async encrypt(
+        plaintext: string,
+        plaintextEncoding: 'hex' | 'utf-8' | 'base64' = 'utf-8',
+        ciphertextEncoding: 'hex' | 'utf-8' | 'base64' = 'base64'
+    ) {
+        return fromUint8Array(new Uint8Array(await crypto.subtle.encrypt(
             {
                 name: this.#algorithm,
-                iv: this.#iv,
+                iv: this.#algorithm === 'AES-CTR' ? undefined : this.#iv,
+                counter: this.#algorithm === 'AES-CTR' ? this.#iv : undefined,
+                length: this.#algorithm === 'AES-CTR' ? 64 : undefined,
             },
-            await this.#key,
-            base64ToUint8Array(encrypted)
-        ));
+            this.#key,
+            toUint8Array(plaintext, plaintextEncoding),
+        )), ciphertextEncoding);
+    }
+
+    async decrypt(
+        ciphertext: string,
+        ciphertextEncoding: 'hex' | 'utf-8' | 'base64' = 'base64',
+        plaintextEncoding: 'hex' | 'utf-8' | 'base64' = 'utf-8',
+    ) {
+        return fromUint8Array(new Uint8Array(await crypto.subtle.decrypt(
+            {
+                name: this.#algorithm,
+                iv: this.#algorithm === 'AES-CTR' ? undefined : this.#iv,
+                counter: this.#algorithm === 'AES-CTR' ? this.#iv : undefined,
+                length: this.#algorithm === 'AES-CTR' ? 64 : undefined,
+            },
+            this.#key,
+            toUint8Array(ciphertext, ciphertextEncoding),
+        )), plaintextEncoding);
     }
 }

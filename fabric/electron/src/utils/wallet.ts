@@ -5,8 +5,7 @@ export const getContract = async (connection: Record<string, unknown>, user: Ide
     await gateway.connect(connection, {
         identity: user,
         discovery: {
-            enabled: true,
-            asLocalhost: true,
+            enabled: false,
         },
     });
     const network = await gateway.getNetwork('channel');

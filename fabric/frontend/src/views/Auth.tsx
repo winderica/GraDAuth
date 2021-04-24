@@ -6,14 +6,14 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { Checkbox } from '../components/Checkbox';
 import { Table } from '../components/Table';
-import { Checked } from '../constants/types';
+import { Checked, TaggedEncrypted, TaggedPreKeyPair } from '../constants/types';
 import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
 import { useUrlParams } from '../hooks/useUrlParams';
 import { useUserData } from '../hooks/useUserData';
 import { UserDataStore } from '../stores';
 import { useStyles } from '../styles/auth';
-import { encrypt } from '../utils/aliceWrapper';
+import { AES } from '../utils/aes';
 import { asyncAction } from '../utils/asyncAction';
 
 interface AuthGettingRequest {
@@ -41,11 +41,14 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
     const classes = useStyles();
     const [checked, setChecked] = useState<Checked>({});
     const handleAuth = async () => {
-        const data = Object.fromEntries(
-            userDataStore.dataArray
-                .filter(({ key }) => checked[key])
-                .map(({ tag }) => [tag, alice.reKey(request.pk, keyStore.dataKey[tag].sk)])
-        );
+        const aes = new AES(keyStore.tagKey, keyStore.tagIV, 'AES-CTR');
+        const data: Record<string, string> = {};
+        for (const { key, tag } of userDataStore.dataArray) {
+            if (!checked[key]) {
+                continue;
+            }
+            data[await aes.encrypt(tag, 'hex', 'hex')] = alice.reKey(request.pk, keyStore.dataKey[tag].sk);
+        }
         await asyncAction(async () => {
             await api.reEncrypt(data, request.callback);
         }, '提交重加密密钥');
@@ -92,7 +95,14 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
         for (const { key, value } of deltaDataStore.dataArray) {
             await userDataStore.set(key, value);
         }
-        const { dataKey, encrypted } = await encrypt(alice, userDataStore.dataArray);
+        const dataKey: TaggedPreKeyPair = {};
+        const encrypted: TaggedEncrypted = {};
+        const aes = new AES(keyStore.tagKey, keyStore.tagIV, 'AES-CTR');
+        for (const { key, tag, value } of userDataStore.dataArray) {
+            const encryptedTag = await aes.encrypt(tag, 'hex', 'hex');
+            dataKey[tag] = alice.key();
+            encrypted[encryptedTag] = await alice.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
+        }
         await asyncAction(async () => {
             await api.setData(encrypted);
             await keyStore.set(dataKey);
@@ -115,7 +125,7 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
 });
 
 export const Auth: FC = observer(() => {
-    const { userDataStore, notificationStore } = useStores();
+    const { keyStore, notificationStore } = useStores();
     const request = useUrlParams<AuthRequest>('request');
 
     useEffect(() => {
@@ -124,7 +134,7 @@ export const Auth: FC = observer(() => {
         }
     }, []);
 
-    if (!userDataStore.password) {
+    if (!keyStore.password) {
         return <Navigate to='/' />;
     }
 

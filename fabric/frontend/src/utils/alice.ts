@@ -35,7 +35,7 @@ export class Alice {
 
     async encrypt(plaintext: string, pk: string): Promise<Encrypted> {
         const aesKey = this.pre.randomGen();
-        const aes = new AES(aesKey);
+        const aes = new AES(await AES.convertKey(aesKey));
         const data = await aes.encrypt(plaintext);
         const { ca0, ca1 } = this.pre.encrypt(aesKey, this.pre.deserialize(pk, 'G1'), this.#g, this.#h);
         return {
@@ -53,6 +53,6 @@ export class Alice {
             ca0: this.pre.deserialize(ca0, 'Fr'),
             ca1: this.pre.deserialize(ca1, 'G1'),
         }, this.pre.deserialize(sk, 'Fr'), this.#h);
-        return new AES(aesKey, iv).decrypt(data);
+        return await new AES(await AES.convertKey(aesKey), AES.convertIV(iv)).decrypt(data);
     }
 }
