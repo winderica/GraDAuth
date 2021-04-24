@@ -16,19 +16,17 @@ import logo from '../images/logo.png';
 import { useStyles } from '../styles/home';
 
 export const Home: FC = observer(() => {
-    const { userDataStore } = useStores();
+    const { keyStore } = useStores();
     const classes = useStyles();
     const [password, setPassword] = useState('');
-    const handleClick = () => {
-        userDataStore.setPassword(password);
-    };
+    const handleClick = () => keyStore.setPassword(password);
     const handleInput: ChangeEventHandler<HTMLInputElement> = (event) => {
         setPassword(event.target.value);
     };
 
     return (
         <div className={classes.container}>
-            <Dialog open={!userDataStore.password}>
+            <Dialog open={!keyStore.password}>
                 <DialogTitle>Input Password</DialogTitle>
                 <DialogContent>
                     <DialogContentText>

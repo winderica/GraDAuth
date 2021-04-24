@@ -1,8 +1,6 @@
-import * as idb from 'idb-keyval';
 import { makeAutoObservable } from 'mobx';
 
 import { UserData } from '../constants/types';
-import { randomId } from '../utils/randomId';
 import { sha256 } from '../utils/sha256';
 
 export class UserDataStore {
@@ -10,21 +8,9 @@ export class UserDataStore {
 
     data: UserData;
 
-    password = sessionStorage.getItem('password') || '';
-
     constructor(data: UserData = {}) {
         this.data = data;
         makeAutoObservable(this);
-    }
-
-    async load() {
-        const id = await idb.get<string>('id');
-        if (id) {
-            this.id = id;
-        } else {
-            this.id = randomId(256);
-            await idb.set('id', this.id);
-        }
     }
 
     setAll(data: UserData) {
@@ -32,16 +18,11 @@ export class UserDataStore {
     }
 
     async set(key: string, value: string) {
-        this.data[key] = { value, tag: await sha256(`${this.id}.${this.password}.${key}.${value}`) };
+        this.data[key] = { value, tag: await sha256(`${key}.${value}`) };
     }
 
     del(name: string) {
         delete this.data[name];
-    }
-
-    setPassword(password: string) {
-        this.password = password;
-        sessionStorage.setItem('password', password);
     }
 
     get dataArray() {
