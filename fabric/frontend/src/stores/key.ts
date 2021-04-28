@@ -11,8 +11,6 @@ export class KeyStore {
 
     tagSalt = crypto.getRandomValues(new Uint8Array(16));
 
-    tagIV = crypto.getRandomValues(new Uint8Array(16));
-
     password = sessionStorage.getItem('password') || '';
 
     constructor() {
@@ -25,12 +23,6 @@ export class KeyStore {
             this.tagSalt = tagSalt;
         } else {
             await idb.set('salt', this.tagSalt);
-        }
-        const tagIV = await idb.get<Uint8Array>('iv');
-        if (tagIV) {
-            this.tagIV = tagIV;
-        } else {
-            await idb.set('iv', this.tagIV);
         }
         this.tagKey = await deriveKeyFromPassword(this.password, this.tagSalt);
         this.dataKey = await idb.get<TaggedPreKeyPair>('dataKey') ?? this.dataKey;
