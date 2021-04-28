@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 
 import { api } from '../api';
 import { UserData } from '../constants/types';
-import { AES } from '../utils/aes';
 import { asyncAction } from '../utils/asyncAction';
+import { hmac } from '../utils/hmac';
 
 import { useAlice } from './useAlice';
 import { useStores } from './useStores';
@@ -16,17 +16,16 @@ export const useUserData = () => {
             return;
         }
         void asyncAction(async () => {
-            const aes = new AES(keyStore.tagKey, keyStore.tagIV, 'AES-CTR');
             const tags = Object.keys(keyStore.dataKey);
             const map: Record<string, string> = {};
             for (const tag of tags) {
-                map[await aes.encrypt(tag, 'hex', 'hex')] = tag;
+                map[await hmac(tag, keyStore.tagKey, 'hex', 'hex')] = tag;
             }
             const data = await api.getData(Object.keys(map));
             const decrypted: UserData = {};
             for (const [tag, encrypted] of Object.entries(data)) {
                 const { key, value } = JSON.parse(await alice.decrypt(encrypted, keyStore.dataKey[map[tag]].sk));
-                decrypted[key as string] = { tag, value };
+                decrypted[key as string] = { tag: map[tag], value };
             }
             userDataStore.setAll(decrypted);
         }, '获取数据');

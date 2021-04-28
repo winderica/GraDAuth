@@ -13,8 +13,8 @@ import { useUrlParams } from '../hooks/useUrlParams';
 import { useUserData } from '../hooks/useUserData';
 import { UserDataStore } from '../stores';
 import { useStyles } from '../styles/auth';
-import { AES } from '../utils/aes';
 import { asyncAction } from '../utils/asyncAction';
+import { hmac } from '../utils/hmac';
 
 interface AuthGettingRequest {
     type: 'get';
@@ -41,13 +41,12 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
     const classes = useStyles();
     const [checked, setChecked] = useState<Checked>({});
     const handleAuth = async () => {
-        const aes = new AES(keyStore.tagKey, keyStore.tagIV, 'AES-CTR');
         const data: Record<string, string> = {};
         for (const { key, tag } of userDataStore.dataArray) {
             if (!checked[key]) {
                 continue;
             }
-            data[await aes.encrypt(tag, 'hex', 'hex')] = alice.reKey(request.pk, keyStore.dataKey[tag].sk);
+            data[await hmac(tag, keyStore.tagKey, 'hex', 'hex')] = alice.reKey(request.pk, keyStore.dataKey[tag].sk);
         }
         await asyncAction(async () => {
             await api.reEncrypt(data, request.callback);
@@ -97,11 +96,10 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
         }
         const dataKey: TaggedPreKeyPair = {};
         const encrypted: TaggedEncrypted = {};
-        const aes = new AES(keyStore.tagKey, keyStore.tagIV, 'AES-CTR');
         for (const { key, tag, value } of userDataStore.dataArray) {
-            const encryptedTag = await aes.encrypt(tag, 'hex', 'hex');
             dataKey[tag] = alice.key();
-            encrypted[encryptedTag] = await alice.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
+            const hashedTag = await hmac(tag, keyStore.tagKey, 'hex', 'hex');
+            encrypted[hashedTag] = await alice.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
         }
         await asyncAction(async () => {
             await api.setData(encrypted);

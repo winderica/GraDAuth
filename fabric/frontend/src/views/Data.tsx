@@ -12,8 +12,8 @@ import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
 import { UserDataStore } from '../stores';
 import { useStyles } from '../styles/data';
-import { AES } from '../utils/aes';
 import { asyncAction } from '../utils/asyncAction';
+import { hmac } from '../utils/hmac';
 
 export const Data: FC = observer(() => {
     const classes = useStyles();
@@ -31,16 +31,15 @@ export const Data: FC = observer(() => {
         const dataKey: TaggedPreKeyPair = {};
         const encrypted: TaggedEncrypted = {};
         const removedTags: string[] = [];
-        const aes = new AES(keyStore.tagKey, keyStore.tagIV, 'AES-CTR');
         for (const tag of oldTags) {
             if (!userDataStore.tags.has(tag)) {
-                removedTags.push(await aes.encrypt(tag, 'hex', 'hex'));
+                removedTags.push(await hmac(tag, keyStore.tagKey, 'hex', 'hex'));
             }
         }
         for (const { key, tag, value } of userDataStore.dataArray) {
-            const encryptedTag = await aes.encrypt(tag, 'hex', 'hex');
             dataKey[tag] = alice.key();
-            encrypted[encryptedTag] = await alice.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
+            const hashedTag = await hmac(tag, keyStore.tagKey, 'hex', 'hex');
+            encrypted[hashedTag] = await alice.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
         }
         await asyncAction(async () => {
             await Promise.all([api.setData(encrypted), api.delData(removedTags)]);

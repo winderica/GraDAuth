@@ -14,10 +14,12 @@ export const deriveKeyFromPassword = async (password: string, salt: Uint8Array) 
             ['deriveBits', 'deriveKey']
         ),
         {
-            name: 'AES-CTR',
-            length: 256,
+            name: 'HMAC',
+            hash: {
+                name: 'SHA-256',
+            },
         },
         true,
-        ['encrypt', 'decrypt']
+        ['sign', 'verify']
     );
 };

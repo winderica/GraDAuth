@@ -2,33 +2,24 @@ import { makeAutoObservable } from 'mobx';
 import { OptionsObject, SnackbarKey, SnackbarMessage, VariantType } from 'notistack';
 
 interface Snackbar {
-    key: SnackbarKey;
     message: SnackbarMessage;
     options: OptionsObject;
 }
 
 export class NotificationStore {
-    notifications: Snackbar[] = [];
+    snackbars: Record<SnackbarKey, Snackbar> = {};
 
     constructor() {
         makeAutoObservable(this);
     }
 
-    enqueueSnackbar({ message, options }: Omit<Snackbar, 'key'>) {
-        this.notifications.push({
-            key: Date.now(),
-            message,
-            options,
-        });
-    }
-
     enqueue(message: SnackbarMessage, variant: VariantType) {
-        this.enqueueSnackbar({
+        this.snackbars[performance.now()] = {
             message,
             options: {
                 variant,
             },
-        });
+        };
     }
 
     enqueueError(message: SnackbarMessage) {
@@ -48,6 +39,6 @@ export class NotificationStore {
     }
 
     removeSnackbar(key: SnackbarKey) {
-        this.notifications = this.notifications.filter((notification) => notification.key !== key);
+        delete this.snackbars[key];
     }
 }
