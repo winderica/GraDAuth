@@ -14,7 +14,6 @@ import { useUserData } from '../hooks/useUserData';
 import { UserDataStore } from '../stores';
 import { useStyles } from '../styles/auth';
 import { asyncAction } from '../utils/asyncAction';
-import { hmac } from '../utils/hmac';
 
 interface AuthGettingRequest {
     type: 'get';
@@ -46,10 +45,10 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
             if (!checked[key]) {
                 continue;
             }
-            data[await hmac(tag, keyStore.tagKey, 'hex', 'hex')] = alice.reKey(request.pk, keyStore.dataKey[tag].sk);
+            data[tag] = alice.reKey(request.pk, keyStore.dataKey[tag].sk);
         }
         await asyncAction(async () => {
-            await api.reEncrypt(data, request.callback);
+            await api.reEncrypt(keyStore.tagKey, data, request.callback);
         }, '提交重加密密钥');
     };
 
@@ -98,11 +97,10 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
         const encrypted: TaggedEncrypted = {};
         for (const { key, tag, value } of userDataStore.dataArray) {
             dataKey[tag] = alice.key();
-            const hashedTag = await hmac(tag, keyStore.tagKey, 'hex', 'hex');
-            encrypted[hashedTag] = await alice.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
+            encrypted[tag] = await alice.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
         }
         await asyncAction(async () => {
-            await api.setData(encrypted);
+            await api.setData(keyStore.tagKey, encrypted);
             await keyStore.set(dataKey);
             navigate('/data');
         }, '提交加密数据');

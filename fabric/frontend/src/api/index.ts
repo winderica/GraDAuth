@@ -36,30 +36,30 @@ class API {
         });
     }
 
-    setData(data: TaggedEncrypted) {
+    setData(key: string, data: TaggedEncrypted) {
         return new Promise<void>((resolve, reject) => {
             ipcRenderer.once('setData', (_, { ok, payload }) => {
                 ok ? resolve() : reject(new Error(payload));
             });
-            ipcRenderer.send('setData', data);
+            ipcRenderer.send('setData', key, data);
         });
     }
 
-    delData(tags: string[]) {
+    delData(key: string, tags: string[]) {
         return new Promise<void>((resolve, reject) => {
             ipcRenderer.once('delData', (_, { ok, payload }) => {
                 ok ? resolve() : reject(new Error(payload));
             });
-            ipcRenderer.send('delData', tags);
+            ipcRenderer.send('delData', key, tags);
         });
     }
 
-    reEncrypt(data: TaggedReKey, to: string) {
+    reEncrypt(key: string, data: TaggedReKey, to: string) {
         return new Promise<void>((resolve, reject) => {
             ipcRenderer.once('reEncrypt', (_, { ok, payload }) => {
                 ok ? resolve() : reject(new Error(payload));
             });
-            ipcRenderer.send('reEncrypt', data, to);
+            ipcRenderer.send('reEncrypt', key, data, to);
         });
     }
 }

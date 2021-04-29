@@ -4,11 +4,11 @@ import { ipcMain, dialog } from 'electron';
 import Store from 'electron-store';
 import { Contract, Identity } from 'fabric-network';
 
-import { parseTag } from './utils/parseTag';
-import { poseidonHashJS, serializePoseidon } from './utils/poseidonHashJS';
-import { prove } from './utils/prove';
+import { parseKey, parseSalt } from './utils/deserializers';
+import { Poseidon } from './utils/poseidon';
 import { getContract } from './utils/wallet';
 
+const poseidon = new Poseidon();
 const store = new Store<{
     connection: Record<string, unknown>;
     identity: Identity;
@@ -66,13 +66,15 @@ ipcMain.on('generators', async (event) => {
     }
 });
 
-ipcMain.on('reEncrypt', async (event, data: Record<string, unknown>, to: string) => {
+ipcMain.on('reEncrypt', async (event, key: string, payload: Record<string, string>, to: string) => {
     try {
+        const parsedKey = parseKey(key);
         await contract.evaluateTransaction('reEncrypt', JSON.stringify(
-            Object.entries(data).map(([k, v]) => {
-                const parsedTag = parseTag(k);
-                const hash = poseidonHashJS(parsedTag);
-                return [serializePoseidon(hash), v, prove(parsedTag, hash)];
+            Object.entries(payload).map(([tag, rk]) => {
+                const now = Date.now();
+                const salt = parseSalt(tag, now);
+                const hash = poseidon.hash(parsedKey, salt);
+                return [tag, rk, now, Poseidon.serialize(hash), poseidon.prove(parsedKey, salt, hash)];
             })
         ), to);
         event.reply('reEncrypt', { ok: true });
@@ -83,28 +85,22 @@ ipcMain.on('reEncrypt', async (event, data: Record<string, unknown>, to: string)
 
 ipcMain.on('getData', async (event, tags: string[]) => {
     try {
-        const map: Record<string, string> = {};
-        const result = await contract.evaluateTransaction('getData', JSON.stringify(
-            tags.map((tag) => {
-                const hash = serializePoseidon(poseidonHashJS(parseTag(tag)));
-                map[hash] = tag;
-                return hash;
-            })
-        ));
-        const data = Object.entries(JSON.parse(result.toString() || '{}'));
-        event.reply('getData', { ok: true, payload: Object.fromEntries(data.map(([k, v]) => [map[k], v])) });
+        const result = await contract.evaluateTransaction('getData', JSON.stringify(tags));
+        event.reply('getData', { ok: true, payload: JSON.parse(result.toString() || '{}') });
     } catch ({ message }) {
         event.reply('getData', { ok: false, payload: message });
     }
 });
 
-ipcMain.on('setData', async (event, data: Record<string, unknown>) => {
+ipcMain.on('setData', async (event, key: string, payload: Record<string, unknown>) => {
     try {
+        const parsedKey = parseKey(key);
         await contract.submitTransaction('setData', JSON.stringify(
-            Object.entries(data).map(([k, v]) => {
-                const parsedTag = parseTag(k);
-                const hash = poseidonHashJS(parsedTag);
-                return [serializePoseidon(hash), v, prove(parsedTag, hash)];
+            Object.entries(payload).map(([tag, data]) => {
+                const now = Date.now();
+                const salt = parseSalt(tag, now);
+                const hash = poseidon.hash(parsedKey, salt);
+                return [tag, data, now, Poseidon.serialize(hash), poseidon.prove(parsedKey, salt, hash)];
             })
         ));
         event.reply('setData', { ok: true });
@@ -113,13 +109,15 @@ ipcMain.on('setData', async (event, data: Record<string, unknown>) => {
     }
 });
 
-ipcMain.on('delData', async (event, tags: string[]) => {
+ipcMain.on('delData', async (event, key: string, tags: string[]) => {
     try {
+        const parsedKey = parseKey(key);
         await contract.submitTransaction('delData', JSON.stringify(
             tags.map((tag) => {
-                const parsedTag = parseTag(tag);
-                const hash = poseidonHashJS(parsedTag);
-                return [serializePoseidon(hash), prove(parsedTag, hash)];
+                const now = Date.now();
+                const salt = parseSalt(tag, now);
+                const hash = poseidon.hash(parsedKey, salt);
+                return [tag, now, Poseidon.serialize(hash), poseidon.prove(parsedKey, salt, hash)];
             })
         ));
         event.reply('delData', { ok: true });
