@@ -1,11 +1,10 @@
 import { makeAutoObservable } from 'mobx';
 
 import { UserData } from '../constants/types';
+import { fromUint8Array } from '../utils/codec';
 import { sha256 } from '../utils/sha256';
 
 export class UserDataStore {
-    id!: string;
-
     data: UserData;
 
     constructor(data: UserData = {}) {
@@ -18,7 +17,10 @@ export class UserDataStore {
     }
 
     async set(key: string, value: string) {
-        this.data[key] = { value, tag: await sha256(`${key}.${value}`) };
+        this.data[key] = {
+            value,
+            tag: await sha256(`${key}.${value}.${fromUint8Array(crypto.getRandomValues(new Uint8Array(64)), 'hex')}`),
+        };
     }
 
     del(name: string) {
