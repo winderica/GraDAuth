@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 
 import { UserData } from '../constants/types';
 import { fromUint8Array } from '../utils/codec';
@@ -17,10 +17,13 @@ export class UserDataStore {
     }
 
     async set(key: string, value: string) {
-        this.data[key] = {
+        const data = {
             value,
             tag: await sha256(`${key}.${value}.${fromUint8Array(crypto.getRandomValues(new Uint8Array(64)), 'hex')}`),
         };
+        runInAction(() => {
+            this.data[key] = data;
+        });
     }
 
     del(name: string) {
