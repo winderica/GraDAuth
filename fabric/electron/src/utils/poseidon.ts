@@ -1,6 +1,6 @@
 import { prng } from '@guildofweavers/air-assembly';
 import { createPrimeField } from '@guildofweavers/galois';
-import { inline, instantiateScript } from '@guildofweavers/genstark';
+import { inline, instantiateScript, Logger } from '@guildofweavers/genstark';
 
 export class Poseidon {
     modulus = 2n ** 128n - 9n * 2n ** 32n + 1n;
@@ -64,7 +64,7 @@ export class Poseidon {
         exeQueryCount: 44,
         friQueryCount: 20,
         wasm: true,
-    });
+    }, null as unknown as Logger);
 
     private getConstants(seed: string, count: number) {
         return prng.sha256(Buffer.from(seed), count, this.field);
