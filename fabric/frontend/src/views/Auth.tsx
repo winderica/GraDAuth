@@ -91,8 +91,8 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
     }, [request]);
     const handleAuth = async () => {
         const oldTags = userDataStore.tags;
-        for (const { key, value } of deltaDataStore.dataArray) {
-            await userDataStore.set(key, value);
+        for (const { key, value, tag } of deltaDataStore.dataArray) {
+            await userDataStore.set(key, value, tag);
         }
         const dataKey: TaggedPreKeyPair = {};
         const encrypted: TaggedEncrypted = {};

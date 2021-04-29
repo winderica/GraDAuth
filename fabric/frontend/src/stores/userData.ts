@@ -16,10 +16,13 @@ export class UserDataStore {
         this.data = data;
     }
 
-    async set(key: string, value: string) {
+    async set(key: string, value: string, tag?: string) {
+        if (!tag) {
+            tag = await sha256(`${key}.${value}.${fromUint8Array(crypto.getRandomValues(new Uint8Array(64)), 'hex')}`);
+        }
         const data = {
             value,
-            tag: await sha256(`${key}.${value}.${fromUint8Array(crypto.getRandomValues(new Uint8Array(64)), 'hex')}`),
+            tag,
         };
         runInAction(() => {
             this.data[key] = data;
