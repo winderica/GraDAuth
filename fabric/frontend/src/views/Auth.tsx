@@ -90,17 +90,24 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
         Object.entries(request.data).map(([k, v]) => deltaDataStore.set(k, v));
     }, [request]);
     const handleAuth = async () => {
+        const oldTags = userDataStore.tags;
         for (const { key, value } of deltaDataStore.dataArray) {
             await userDataStore.set(key, value);
         }
         const dataKey: TaggedPreKeyPair = {};
         const encrypted: TaggedEncrypted = {};
+        const removedTags: string[] = [];
+        for (const tag of oldTags) {
+            if (!userDataStore.tags.has(tag)) {
+                removedTags.push(tag);
+            }
+        }
         for (const { key, tag, value } of userDataStore.dataArray) {
             dataKey[tag] = alice.key();
             encrypted[tag] = await alice.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
         }
         await asyncAction(async () => {
-            await api.setData(keyStore.tagKey, encrypted);
+            await Promise.all([api.setData(keyStore.tagKey, encrypted), api.delData(keyStore.tagKey, removedTags)]);
             await keyStore.set(dataKey);
             navigate('/data');
         }, '提交加密数据');
