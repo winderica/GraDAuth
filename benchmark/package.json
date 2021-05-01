@@ -1,0 +1,10 @@
+{
+  "name": "benchmark",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@guildofweavers/genstark": "^0.7.6",
+    "mcl": "file:../lib/mcl"
+  }
+}
+
