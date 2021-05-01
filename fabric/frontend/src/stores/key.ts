@@ -2,11 +2,12 @@ import * as idb from 'idb-keyval';
 import { makeAutoObservable } from 'mobx';
 
 import { TaggedPreKeyPair } from '../constants/types';
-import { fromUint8Array } from '../utils/codec';
 import { deriveKeyFromPassword } from '../utils/pbkdf2';
 
 export class KeyStore {
     dataKey: TaggedPreKeyPair = {};
+
+    tagHMACKey = {} as CryptoKey;
 
     tagKey = '';
 
@@ -25,7 +26,9 @@ export class KeyStore {
         } else {
             await idb.set('salt', this.tagSalt);
         }
-        this.tagKey = fromUint8Array(await deriveKeyFromPassword(this.password, this.tagSalt), 'hex');
+        const { hmac, raw } = await deriveKeyFromPassword(this.password, this.tagSalt);
+        this.tagHMACKey = hmac;
+        this.tagKey = raw;
         this.dataKey = await idb.get<TaggedPreKeyPair>('dataKey') ?? this.dataKey;
     }
 
@@ -36,7 +39,9 @@ export class KeyStore {
 
     async setPassword(password: string) {
         this.password = password;
-        this.tagKey = fromUint8Array(await deriveKeyFromPassword(this.password, this.tagSalt), 'hex');
+        const { hmac, raw } = await deriveKeyFromPassword(this.password, this.tagSalt);
+        this.tagHMACKey = hmac;
+        this.tagKey = raw;
         sessionStorage.setItem('password', password);
     }
 }

@@ -14,6 +14,7 @@ import { useUserData } from '../hooks/useUserData';
 import { UserDataStore } from '../stores';
 import { useStyles } from '../styles/auth';
 import { asyncAction } from '../utils/asyncAction';
+import { hmac } from '../utils/hmac';
 
 interface AuthGettingRequest {
     type: 'get';
@@ -45,7 +46,8 @@ const AuthGetting: FC<{ request: AuthGettingRequest }> = observer(({ request }) 
             if (!checked[key]) {
                 continue;
             }
-            data[tag] = alice.reKey(request.pk, keyStore.dataKey[tag].sk);
+            const hashedTag = await hmac(tag, keyStore.tagHMACKey, 'hex', 'hex');
+            data[hashedTag] = alice.reKey(request.pk, keyStore.dataKey[tag].sk);
         }
         await asyncAction(async () => {
             await api.reEncrypt(keyStore.tagKey, data, request.callback);
@@ -99,12 +101,13 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
         const removedTags: string[] = [];
         for (const tag of oldTags) {
             if (!userDataStore.tags.has(tag)) {
-                removedTags.push(tag);
+                removedTags.push(await hmac(tag, keyStore.tagHMACKey, 'hex', 'hex'));
             }
         }
         for (const { key, tag, value } of userDataStore.dataArray) {
             dataKey[tag] = alice.key();
-            encrypted[tag] = await alice.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
+            const hashedTag = await hmac(tag, keyStore.tagHMACKey, 'hex', 'hex');
+            encrypted[hashedTag] = await alice.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
         }
         await asyncAction(async () => {
             await Promise.all([api.setData(keyStore.tagKey, encrypted), api.delData(keyStore.tagKey, removedTags)]);
