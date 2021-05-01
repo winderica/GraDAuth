@@ -62,7 +62,7 @@ export class Poseidon {
         hashAlgorithm: 'blake2s256',
         extensionFactor: 32,
         exeQueryCount: 44,
-        friQueryCount: 20,
+        friQueryCount: 30,
         wasm: true,
     }, null as unknown as Logger);
 
