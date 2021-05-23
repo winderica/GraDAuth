@@ -6,7 +6,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { Checkbox } from '../components/Checkbox';
 import { Table } from '../components/Table';
-import { Checked, TaggedEncrypted, TaggedPreKeyPair } from '../constants/types';
+import { Checked, TaggedEncrypted } from '../constants/types';
 import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
 import { useUrlParams } from '../hooks/useUrlParams';
@@ -96,22 +96,25 @@ const AuthSetting: FC<{ request: AuthSettingRequest }> = observer(({ request }) 
         for (const { key, value, tag } of deltaDataStore.dataArray) {
             await userDataStore.set(key, value, tag);
         }
-        const dataKey: TaggedPreKeyPair = {};
         const encrypted: TaggedEncrypted = {};
         const removedTags: string[] = [];
         for (const tag of oldTags) {
             if (!userDataStore.tags.has(tag)) {
                 removedTags.push(await hmac(tag, keyStore.tagHMACKey, 'hex', 'hex'));
+                keyStore.del(tag);
             }
         }
         for (const { key, tag, value } of userDataStore.dataArray) {
-            dataKey[tag] = alice.key();
-            const hashedTag = await hmac(tag, keyStore.tagHMACKey, 'hex', 'hex');
-            encrypted[hashedTag] = await alice.encrypt(JSON.stringify({ key, value }), dataKey[tag].pk);
+            if (!oldTags.has(tag)) {
+                const { pk, sk } = alice.key();
+                const hashedTag = await hmac(tag, keyStore.tagHMACKey, 'hex', 'hex');
+                encrypted[hashedTag] = await alice.encrypt(JSON.stringify({ key, value }), pk);
+                keyStore.set(tag, { pk, sk });
+            }
         }
         await asyncAction(async () => {
             await Promise.all([api.setData(keyStore.tagKey, encrypted), api.delData(keyStore.tagKey, removedTags)]);
-            await keyStore.set(dataKey);
+            await keyStore.save();
             navigate('/data');
         }, '提交加密数据');
     };

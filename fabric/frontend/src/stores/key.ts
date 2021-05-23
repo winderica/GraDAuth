@@ -1,7 +1,7 @@
 import * as idb from 'idb-keyval';
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, toJS } from 'mobx';
 
-import { TaggedPreKeyPair } from '../constants/types';
+import { PreKeyPair, TaggedPreKeyPair } from '../constants/types';
 import { deriveKeyFromPassword } from '../utils/pbkdf2';
 
 export class KeyStore {
@@ -24,7 +24,7 @@ export class KeyStore {
         if (tagSalt) {
             this.tagSalt = tagSalt;
         } else {
-            await idb.set('salt', this.tagSalt);
+            await idb.set('salt', toJS(this.tagSalt));
         }
         const { hmac, raw } = await deriveKeyFromPassword(this.password, this.tagSalt);
         this.tagHMACKey = hmac;
@@ -32,9 +32,16 @@ export class KeyStore {
         this.dataKey = await idb.get<TaggedPreKeyPair>('dataKey') ?? this.dataKey;
     }
 
-    async set(key: TaggedPreKeyPair) {
-        this.dataKey = key;
-        await idb.set('dataKey', key);
+    set(tag: string, key: PreKeyPair) {
+        this.dataKey[tag] = key;
+    }
+
+    del(tag: string) {
+        delete this.dataKey[tag];
+    }
+
+    async save() {
+        await idb.set('dataKey', toJS(this.dataKey));
     }
 
     async setPassword(password: string) {
